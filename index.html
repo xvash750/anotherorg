@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Org Chart</title>
+    <title>Collapsible Org Chart</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -14,12 +14,16 @@
         svg {
             background-color: #f4f4f4;
         }
+        .node circle {
+            cursor: pointer;
+            stroke: #3182bd;
+            stroke-width: 1.5px;
+        }
     </style>
 </head>
 <body>
     <script>
-        // Sample employee data with 100 additional random positions
-      const employeeData = [
+        const employeeData = [
     { id: '1', name: 'John Doe', managerId: null },
     { id: '2', name: 'Jane Smith', managerId: '1' },
     { id: '3', name: 'James Brown', managerId: '1' },
@@ -162,7 +166,6 @@
     ];
 
 
-        // Set dimensions
         const width = window.innerWidth;
         const height = window.innerHeight;
 
@@ -170,49 +173,85 @@
             .attr("width", width)
             .attr("height", height);
 
-        // Create hierarchy based on managerId and employeeId
         const root = d3.stratify()
             .id((d) => d.id)
             .parentId((d) => d.managerId)(employeeData);
 
-      const treeLayout = d3.tree()
-            .size([height - 100, width - 100])
-            .separation((a, b) => a.parent === b.parent ? 1.5 : 2); 
+        const treeLayout = d3.tree().size([height - 100, width - 100]);
         const treeData = treeLayout(root);
 
-        const nodes = treeData.descendants();
-        const links = treeData.links();
+        let nodes = treeData.descendants();
+        let links = treeData.links();
 
-        // Render the links (lines connecting nodes)
-        svg.selectAll(".link")
-            .data(links)
-            .enter().append("path")
-            .attr("class", "link")
-            .attr("d", d3.linkHorizontal()
-                .x((d) => d.y)
-                .y((d) => d.x)
-            );
+        // Collapse all nodes at the start
+        nodes.forEach((d) => {
+            if (d.depth === 1) {
+                collapse(d);
+            }
+        });
 
-        // Render the nodes (employee boxes)
-        const nodeEnter = svg.selectAll(".node")
-            .data(nodes)
-            .enter().append("g")
-            .attr("class", "node")
-            .attr("transform", (d) => `translate(${d.y},${d.x})`);
+        // Render the initial tree
+        update(root);
 
-        // Add circles for employees
-        nodeEnter.append("circle")
-            .attr("r", 20)
-            .style("fill", "steelblue");
+        function update(source) {
+            nodes = treeLayout(root).descendants();
+            links = treeLayout(root).links();
 
-        // Add employee names
-        nodeEnter.append("text")
-            .attr("dy", ".35em")
-            .attr("y", -25)
-            .style("text-anchor", "middle")
-            .text((d) => d.data.name);
+            svg.selectAll("*").remove();
 
-        // Handle window resizing
+            const link = svg.selectAll(".link")
+                .data(links)
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("d", d3.linkHorizontal()
+                    .x((d) => d.y)
+                    .y((d) => d.x)
+                );
+
+            const node = svg.selectAll(".node")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .attr("transform", (d) => `translate(${d.y},${d.x})`);
+
+            node.append("circle")
+                .attr("r", 20)
+                .style("fill", (d) => d.children || d._children ? "steelblue" : "#fff")
+                .on("click", click); // Add click event for collapsing/expanding
+
+            node.append("text")
+                .attr("dy", ".35em")
+                .attr("y", -25)
+                .style("text-anchor", "middle")
+                .text((d) => d.data.name);
+        }
+
+        // Toggle children on click
+        function click(event, d) {
+            if (d.children) {
+                collapse(d);
+            } else {
+                expand(d);
+            }
+            update(d);
+        }
+
+        // Collapse node by hiding its children
+        function collapse(d) {
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            }
+        }
+
+        // Expand node by restoring its children
+        function expand(d) {
+            if (d._children) {
+                d.children = d._children;
+                d._children = null;
+            }
+        }
+
         window.addEventListener('resize', () => {
             const newWidth = window.innerWidth;
             const newHeight = window.innerHeight;
@@ -220,24 +259,8 @@
             svg.attr("width", newWidth)
                 .attr("height", newHeight);
 
-            // Redraw the tree
             treeLayout.size([newHeight - 100, newWidth - 100]);
-            const newTreeData = treeLayout(root);
-
-            // Update links
-            svg.selectAll(".link")
-                .data(newTreeData.links())
-                .attr("d", d3.linkHorizontal()
-                    .x((d) => d.y)
-                    .y((d) => d.x)
-                );
-
-            // Update nodes
-            const nodeUpdate = svg.selectAll(".node")
-                .data(newTreeData.descendants());
-
-            // Update positions
-            nodeUpdate.attr("transform", (d) => `translate(${d.y},${d.x})`);
+            update(root);
         });
     </script>
 </body>
