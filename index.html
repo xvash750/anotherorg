@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compact Columnar Org Chart with Cards</title>
+    <title>Vertical Org Chart with Zoom, Collapse, and Level Control</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -14,23 +14,15 @@
         svg {
             background-color: #f4f4f4;
         }
-        .node rect {
+        .node circle {
             cursor: pointer;
-            fill: #fff;
-            stroke: steelblue;
-            stroke-width: 2px;
-            rx: 10; /* Rounded corners */
-            ry: 10;
-        }
-        .node text {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            fill: #333;
+            stroke: #3182bd;
+            stroke-width: 1.5px;
         }
         .link {
             fill: none;
             stroke: #999;
-            stroke-width: 2px;
+            stroke-width: 2px; /* Uniform stroke width */
         }
         #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandLevelDropdown {
             position: absolute;
@@ -68,51 +60,11 @@
 
     <script>
         const employeeData = [
-    { id: '1', name: 'John Doe', managerId: null },
-    { id: '2', name: 'Jane Smith', managerId: '1' },
-    { id: '3', name: 'James Brown', managerId: '1' },
-    { id: '4', name: 'Mark Johnson', managerId: '2' },
-    { id: '5', name: 'Emma Williams', managerId: '2' },
-    { id: '6', name: 'Alice Davis', managerId: '3' },
-    { id: '7', name: 'Michael Miller', managerId: '3' },
-    { id: '8', name: 'Sarah Wilson', managerId: '2' },
-    { id: '9', name: 'David Anderson', managerId: '4' },
-    { id: '10', name: 'Sophia Thomas', managerId: '4' },
-    { id: '11', name: 'Daniel Taylor', managerId: '5' },
-    { id: '12', name: 'Olivia Martinez', managerId: '5' },
-    { id: '13', name: 'Isabella Jackson', managerId: '6' },
-    { id: '14', name: 'Lucas Harris', managerId: '6' },
-    { id: '15', name: 'Mason Clark', managerId: '7' },
-    { id: '16', name: 'Liam Lewis', managerId: '7' },
-    { id: '17', name: 'Ella Lee', managerId: '8' },
-    { id: '18', name: 'Charlotte Walker', managerId: '8' },
-    { id: '19', name: 'Ava Hall', managerId: '9' },
-    { id: '20', name: 'Emily Allen', managerId: '9' },
-    { id: '21', name: 'Jacob Young', managerId: '10' },
-    { id: '22', name: 'Benjamin King', managerId: '10' },
-    { id: '23', name: 'James Wright', managerId: '11' },
-    { id: '24', name: 'Mia Scott', managerId: '11' },
-    { id: '25', name: 'Hannah Adams', managerId: '12' },
-    { id: '26', name: 'William Baker', managerId: '12' },
-    { id: '27', name: 'Ethan Gonzalez', managerId: '13' },
-    { id: '28', name: 'Zoe Nelson', managerId: '13' },
-    { id: '29', name: 'Lily Carter', managerId: '14' },
-    { id: '30', name: 'Aiden Mitchell', managerId: '14' },
-    { id: '31', name: 'Scarlett Perez', managerId: '15' },
-    { id: '32', name: 'Layla Roberts', managerId: '15' },
-    { id: '33', name: 'Grace Turner', managerId: '16' },
-    { id: '34', name: 'Chloe Phillips', managerId: '16' },
-    { id: '35', name: 'Ella Campbell', managerId: '17' },
-    { id: '36', name: 'Madison Parker', managerId: '17' },
-    { id: '37', name: 'Hannah Edwards', managerId: '18' },
-    { id: '38', name: 'Audrey Collins', managerId: '18' },
-    { id: '39', name: 'Anna Stewart', managerId: '19' },
-    { id: '40', name: 'Violet Sanchez', managerId: '19' },
-    { id: '41', name: 'Aria Morris', managerId: '20' },
-    { id: '42', name: 'Savannah Rogers', managerId: '20' },
-    { id: '43', name: 'Brianna Reed', managerId: '21' },
-    { id: '44', name: 'Kylie Cook', managerId: '21' },
-            // Add more employees or generate more here...
+            { id: '1', name: 'John Doe', managerId: null },
+            { id: '2', name: 'Jane Smith', managerId: '1' },
+            { id: '3', name: 'James Brown', managerId: '1' },
+            { id: '140', name: 'Jonathon Adams', managerId: '69' },
+            { id: '141', name: 'Elena Roberts', managerId: '69' }
         ];
 
         const width = window.innerWidth;
@@ -129,8 +81,8 @@
             .parentId((d) => d.managerId)(employeeData);
 
         const treeLayout = d3.tree()
-            .nodeSize([120, 150])  // Reduce vertical/horizontal spacing for compact layout
-            .separation((a, b) => a.parent === b.parent ? 1 : 1.5);
+            .nodeSize([200, 100])  // Adjust size for vertical layout
+            .separation((a, b) => a.parent === b.parent ? 1.5 : 2);
 
         let treeData = treeLayout(root);
         let nodes = treeData.descendants();
@@ -158,10 +110,10 @@
                 .enter().append("path")
                 .attr("class", "link")
                 .attr("d", d3.linkVertical()  // Changed to `linkVertical` for vertical layout
-                    .x((d) => d.x)
+                    .x((d) => d.x) // Swap x and y to make vertical layout
                     .y((d) => d.y)
                 )
-                .attr("stroke-width", "2px");
+                .attr("stroke-width", "2px"); // Uniform stroke width
 
             const node = svg.selectAll(".node")
                 .data(nodes)
@@ -169,29 +121,16 @@
                 .attr("class", "node")
                 .attr("transform", (d) => `translate(${d.x},${d.y})`);
 
-            // Create a card (rectangle) for each node
-            node.append("rect")
-                .attr("width", 120)
-                .attr("height", 60)  // Adjust card size for compact layout
-                .attr("x", -60) // Center the rectangle horizontally
-                .attr("y", -30) // Center the rectangle vertically
-                .style("fill", "#fff")
+            node.append("circle")
+                .attr("r", 20)
+                .style("fill", (d) => d.children || d._children ? "steelblue" : "#fff")
                 .on("click", click);
 
-            // Add employee name inside the card
-            node.append("text")
-                .attr("dy", "-5px")
-                .attr("y", -10)
-                .style("text-anchor", "middle")
-                .text((d) => d.data.name);
-
-            // Add employee position inside the card
             node.append("text")
                 .attr("dy", ".35em")
-                .attr("y", 10)
+                .attr("y", -30)  // Adjust y position for vertical layout
                 .style("text-anchor", "middle")
-                .style("font-size", "10px")
-                .text((d) => d.data.position);
+                .text((d) => d.data.name);
         }
 
         // Zoom function
