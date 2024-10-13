@@ -16,7 +16,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 200vh;
         }
         .node circle {
             fill: steelblue;
@@ -61,7 +61,7 @@
         .id(d => d.id)
         .parentId(d => d.managerId)(employeeData);
 
-    const treeLayout = d3.tree().size([width , height ]);
+    const treeLayout = d3.tree().size([width -200 , height -200 ]);
     const treeData = treeLayout(root);
 
     const nodes = treeData.descendants();
