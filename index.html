@@ -67,28 +67,29 @@
     </select>
 
     <script>
-        const employeeData = [
-            { id: '1', name: 'John Doe', managerId: null, team: 'Leadership', jobTitle: 'CEO' },
-            { id: '2', name: 'Jane Smith', managerId: '1', team: 'Leadership', jobTitle: 'CTO' },
-            { id: '3', name: 'James Brown', managerId: '1', team: 'Leadership', jobTitle: 'CFO' },
-            { id: '4', name: 'Emily Davis', managerId: '2', team: 'Engineering', jobTitle: 'Lead Engineer' },
-            { id: '5', name: 'Michael Johnson', managerId: '2', team: 'Engineering', jobTitle: 'Software Engineer' },
-            { id: '6', name: 'Jessica Williams', managerId: '3', team: 'Finance', jobTitle: 'Finance Manager' },
-            { id: '7', name: 'Daniel Wilson', managerId: '3', team: 'Finance', jobTitle: 'Accountant' },
-            { id: '8', name: 'Sophia Martinez', managerId: '4', team: 'Engineering', jobTitle: 'Product Manager' },
-            { id: '9', name: 'David Garcia', managerId: '5', team: 'Engineering', jobTitle: 'QA Engineer' },
-            { id: '10', name: 'Olivia Rodriguez', managerId: '6', team: 'Finance', jobTitle: 'Financial Analyst' },
-            { id: '11', name: 'William Lee', managerId: '6', team: 'Finance', jobTitle: 'Auditor' },
-            { id: '12', name: 'Emma Perez', managerId: '8', team: 'Engineering', jobTitle: 'UX Designer' },
-            { id: '13', name: 'Liam Taylor', managerId: '8', team: 'Engineering', jobTitle: 'Frontend Developer' },
-            { id: '14', name: 'Ava Thompson', managerId: '9', team: 'Engineering', jobTitle: 'Backend Developer' },
-            { id: '15', name: 'Mason White', managerId: '7', team: 'Finance', jobTitle: 'Tax Specialist' },
-            { id: '16', name: 'Isabella Harris', managerId: '1', team: 'Leadership', jobTitle: 'COO' },
-            { id: '17', name: 'Ethan Clark', managerId: '16', team: 'Operations', jobTitle: 'Operations Manager' },
-            { id: '18', name: 'Charlotte Lewis', managerId: '16', team: 'Operations', jobTitle: 'Logistics Coordinator' },
-            { id: '19', name: 'Oliver Robinson', managerId: '5', team: 'Engineering', jobTitle: 'DevOps Engineer' },
-            { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' }
-        ];
+      const employeeData = [
+    { id: '1', name: 'John Doe', managerId: null, team: 'Leadership', jobTitle: 'CEO' },
+    { id: '2', name: 'Jane Smith', managerId: '1', team: 'Leadership', jobTitle: 'CTO' },
+    { id: '3', name: 'James Brown', managerId: '1', team: 'Leadership', jobTitle: 'CFO' },
+    { id: '4', name: 'Emily Davis', managerId: '2', team: 'Engineering', jobTitle: 'Lead Engineer' },
+    { id: '5', name: 'Michael Johnson', managerId: '2', team: 'Engineering', jobTitle: 'Software Engineer' },
+    { id: '6', name: 'Jessica Williams', managerId: '3', team: 'Finance', jobTitle: 'Finance Manager' },
+    { id: '7', name: 'Daniel Wilson', managerId: '3', team: 'Finance', jobTitle: 'Accountant' },
+    { id: '8', name: 'Sophia Martinez', managerId: '4', team: 'Engineering', jobTitle: 'Product Manager' },
+    { id: '9', name: 'David Garcia', managerId: '5', team: 'Engineering', jobTitle: 'QA Engineer' },
+    { id: '10', name: 'Olivia Rodriguez', managerId: '6', team: 'Finance', jobTitle: 'Financial Analyst' },
+    { id: '11', name: 'William Lee', managerId: '6', team: 'Finance', jobTitle: 'Auditor' },
+    { id: '12', name: 'Emma Perez', managerId: '8', team: 'Engineering', jobTitle: 'UX Designer' },
+    { id: '13', name: 'Liam Taylor', managerId: '8', team: 'Engineering', jobTitle: 'Frontend Developer' },
+    { id: '14', name: 'Ava Thompson', managerId: '9', team: 'Engineering', jobTitle: 'Backend Developer' },
+    { id: '15', name: 'Mason White', managerId: '7', team: 'Finance', jobTitle: 'Tax Specialist' },
+    { id: '16', name: 'Isabella Harris', managerId: '1', team: 'Leadership', jobTitle: 'COO' },
+    { id: '17', name: 'Ethan Clark', managerId: '16', team: 'Operations', jobTitle: 'Operations Manager' },
+    { id: '18', name: 'Charlotte Lewis', managerId: '16', team: 'Operations', jobTitle: 'Logistics Coordinator' },
+    { id: '19', name: 'Oliver Robinson', managerId: '5', team: 'Engineering', jobTitle: 'DevOps Engineer' },
+    { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' }
+    // Add more entries as needed
+];
 
         const width = window.innerWidth;
         const height = window.innerHeight;
@@ -120,14 +121,6 @@
 
         update(root);
 
-        // Function to count total descendants
-        function countDescendants(node) {
-            if (!node.children || node.children.length === 0) {
-                return 0; // No children means no descendants
-            }
-            return node.children.length + node.children.reduce((acc, child) => acc + countDescendants(child), 0);
-        }
-
         function update(source) {
             treeData = treeLayout(root);
             nodes = treeData.descendants();
@@ -155,61 +148,33 @@
             // Create a card (rectangle) for each node
             node.append("rect")
                 .attr("width", 120)
-                .attr("height", 80)  // Adjust card size for extra text
+                .attr("height", 60)  // Adjust card size for compact layout
                 .attr("x", -60) // Center the rectangle horizontally
-                .attr("y", -40) // Center the rectangle vertically
+                .attr("y", -30) // Center the rectangle vertically
                 .style("fill", "#fff")
                 .on("click", click);
 
-            // Add employee name inside the card
-            node.append("text")
-                .attr("dy", "-15px")
-                .attr("y", -10)
-                .style("text-anchor", "middle")
-                .text((d) => d.data.name);
+       // Add employee name inside the card
+node.append("text")
+    .attr("dy", "-5px")
+    .attr("y", -10)
+    .style("text-anchor", "middle")
+    .text((d) => d.data.name);
 
-            // Add team inside the card
-            node.append("text")
-                .attr("dy", "1.2em")
-                .attr("y", 5)
-                .style("text-anchor", "middle")
-                .style("font-size", "10px")
-                .text((d) => d.data.team);
-
-            // Add job title inside the card
-            node.append("text")
-                .attr("dy", "1.2em") // Adjust to place below the team
-                .attr("y", 20) // Offset vertically from the top of the card
-                .style("text-anchor", "middle")
-                .style("font-size", "10px")
-                .text((d) => d.data.jobTitle);
-
-            // Add descendant count below the job title
-            node.append("text")
-                .attr("dy", "1.2em") // Adjust to place below the job title
-                .attr("y", 35) // Offset vertically from the top of the card
-                .style("text-anchor", "middle")
-                .style("font-size", "10px")
-                .style("fill", "gray")
-                .text((d) => `Reports: ${countDescendants(d)}`);
-
-            // Update node styles based on depth
-            node.select("rect")
-                .style("fill", (d) => d.depth === 0 ? "#f8d7da" : d.depth === 1 ? "#ffeeba" : "#d4edda");
-
-            // Handle collapsing and expanding on click
-            function click(event, d) {
-                d.children = d.children ? null : d._children;
-                update(d);
-            }
-        }
-
-        // Collapse function
-        function collapse(node) {
-            if (node.children) {
-                node._children = node.children; // Store children for later use
-                node.children = null; // Collapse
-            }
+// Add employee position inside the card
+node.append("text")
+    .attr("dy", "1.2em") // Adjust to place below the name
+    .attr("y", -5) // Offset vertically from the top of the card
+    .style("text-anchor", "middle")
+    .style("font-size", "10px")
+    .text((d) => d.data.team);
+// Add employee position inside the card
+node.append("text")
+    .attr("dy", "1.2em") // Adjust to place below the name
+    .attr("y", 10) // Offset vertically from the top of the card
+    .style("text-anchor", "middle")
+    .style("font-size", "10px")
+    .text((d) => d.data.jobTitle);
         }
 
         // Zoom function
@@ -217,40 +182,92 @@
             svg.attr("transform", event.transform);
         }
 
-        // Event listeners for buttons and zoom slider
-        d3.select("#collapseAllBtn").on("click", () => {
-            nodes.forEach((d) => {
-                if (d.depth > 0) collapse(d);
-            });
-            update(root);
-        });
+        // Toggle children on click
+        function click(event, d) {
+            if (d.children) {
+                collapse(d);
+            } else {
+                expand(d);
+            }
+            update(d);
+        }
 
-        d3.select("#expandAllBtn").on("click", () => {
-            nodes.forEach((d) => {
-                if (d._children) {
-                    d.children = d._children; // Restore children
-                    d._children = null; // Remove the temporary property
-                }
-            });
-            update(root);
-        });
+        // Collapse node by hiding its children
+        function collapse(d) {
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            }
+        }
 
-        d3.select("#expandLevelDropdown").on("change", function () {
-            const selectedLevel = +this.value;
-            nodes.forEach((d) => {
-                if (d.depth > selectedLevel) {
+        // Expand node by restoring its children
+        function expand(d) {
+            if (d._children) {
+                d.children = d._children;
+                d._children = null;
+            }
+        }
+
+        // Collapse all nodes
+        function collapseAll() {
+            root.descendants().forEach((d) => {
+                if (d.children) {
                     collapse(d);
-                } else {
-                    d.children = d._children; // Restore children
                 }
             });
             update(root);
+        }
+
+        // Expand all nodes
+        function expandAll() {
+            root.descendants().forEach((d) => {
+                if (d._children) {
+                    expand(d);
+                }
+            });
+            update(root);
+        }
+
+        // Expand nodes up to a specific level
+        function expandToLevel(level) {
+            root.descendants().forEach((d) => {
+                if (d.depth < level) {
+                    expand(d);
+                } else {
+                    collapse(d);
+                }
+            });
+            update(root);
+        }
+
+        // Handle zoom slider changes
+        const zoomSlider = document.getElementById('zoomSlider');
+        zoomSlider.addEventListener('input', function () {
+            const zoomLevel = parseFloat(zoomSlider.value);
+            svg.attr("transform", `scale(${zoomLevel})`);
         });
 
-        // Zoom functionality
-        d3.select("#zoomSlider").on("input", function () {
-            const zoomLevel = this.value;
-            svg.attr("transform", `scale(${zoomLevel})`);
+        // Add event listeners for collapse/expand all buttons
+        document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
+        document.getElementById('expandAllBtn').addEventListener('click', expandAll);
+
+        // Add event listener for level control dropdown
+        document.getElementById('expandLevelDropdown').addEventListener('change', function () {
+            const level = parseInt(this.value);
+            expandToLevel(level);
+        });
+
+        // Automatically resize the tree when window size changes
+        window.addEventListener('resize', () => {
+            const newWidth = window.innerWidth;
+            const newHeight = window.innerHeight;
+
+            d3.select("svg")
+                .attr("width", newWidth)
+                .attr("height", newHeight);
+
+            treeLayout.size([newHeight - 100, newWidth - 100]);
+            update(root);
         });
     </script>
 </body>
