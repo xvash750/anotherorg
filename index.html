@@ -32,7 +32,7 @@
             stroke: #999;
             stroke-width: 2px;
         }
-        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandLevelDropdown {
+        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandLevelDropdown, #toggleViewBtn {
             position: absolute;
             top: 10px;
             z-index: 10;
@@ -49,239 +49,287 @@
         #expandLevelDropdown {
             left: 350px;
         }
-        /* Styles for the table */
-        #employeeTable {
-            display: none; /* Hide by default */
-            margin: 20px;
-            border-collapse: collapse;
-            width: calc(100% - 40px);
+        #toggleViewBtn {
+            left: 450px;
         }
-        #employeeTable th, #employeeTable td {
+        #employeeData {
+            display: none;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
             border: 1px solid #ddd;
+        }
+        th, td {
             padding: 8px;
             text-align: left;
         }
-        #employeeTable th {
-            background-color: #f2f2f2;
+        th {
+            background-color: #f4f4f4;
         }
-        #nav {
-            position: absolute;
-            top: 10px;
-            left: 500px;
-            z-index: 10;
+        .edit-btn, .delete-btn {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Menu -->
-    <div id="nav">
-        <button id="showOrgChartBtn">Show Org Chart</button>
-        <button id="showEmployeeTableBtn">Show Employee Data</button>
+    <!-- Navigation Button -->
+    <button id="toggleViewBtn">Show Employee Data</button>
+    
+    <!-- Org Chart View -->
+    <div id="orgChart">
+        <!-- Zoom Slider -->
+        <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.1" value="1" />
+        <!-- Collapse/Expand All Buttons -->
+        <button id="collapseAllBtn">Collapse All</button>
+        <button id="expandAllBtn">Expand All</button>
+        <!-- Level Control Dropdown -->
+        <select id="expandLevelDropdown">
+            <option value="1">Expand to Level 1</option>
+            <option value="2" selected>Expand to Level 2</option>
+            <option value="3">Expand to Level 3</option>
+            <option value="4">Expand to Level 4</option>
+            <option value="5">Expand to Level 5</option>
+        </select>
     </div>
 
-    <!-- Zoom Slider -->
-    <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.1" value="1" />
-    <!-- Collapse/Expand All Buttons -->
-    <button id="collapseAllBtn">Collapse All</button>
-    <button id="expandAllBtn">Expand All</button>
-    <!-- Level Control Dropdown -->
-    <select id="expandLevelDropdown">
-        <option value="1">Expand to Level 1</option>
-        <option value="2" selected>Expand to Level 2</option>
-        <option value="3">Expand to Level 3</option>
-        <option value="4">Expand to Level 4</option>
-        <option value="5">Expand to Level 5</option>
-    </select>
+    <!-- Employee Data View -->
+    <div id="employeeData">
+        <h1>Employee Data</h1>
+        <table id="employeeTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Manager ID</th>
+                    <th>Team</th>
+                    <th>Job Title</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Employee data will be populated here -->
+            </tbody>
+        </table>
+    </div>
 
-    <!-- Org Chart Section -->
-    <div id="orgChart">
-        <script>
-            const employeeData = [
-                { id: '1', name: 'John Doe', managerId: null, team: 'Leadership', jobTitle: 'CEO' },
-                { id: '2', name: 'Jane Smith', managerId: '1', team: 'Leadership', jobTitle: 'CTO' },
-                { id: '3', name: 'James Brown', managerId: '1', team: 'Leadership', jobTitle: 'CFO' },
-                { id: '4', name: 'Emily Davis', managerId: '2', team: 'Engineering', jobTitle: 'Lead Engineer' },
-                { id: '5', name: 'Michael Johnson', managerId: '2', team: 'Engineering', jobTitle: 'Software Engineer' },
-                { id: '6', name: 'Jessica Williams', managerId: '3', team: 'Finance', jobTitle: 'Finance Manager' },
-                { id: '7', name: 'Daniel Wilson', managerId: '3', team: 'Finance', jobTitle: 'Accountant' },
-                { id: '8', name: 'Sophia Martinez', managerId: '4', team: 'Engineering', jobTitle: 'Product Manager' },
-                { id: '9', name: 'David Garcia', managerId: '5', team: 'Engineering', jobTitle: 'QA Engineer' },
-                { id: '10', name: 'Olivia Rodriguez', managerId: '6', team: 'Finance', jobTitle: 'Financial Analyst' },
-                { id: '11', name: 'William Lee', managerId: '6', team: 'Finance', jobTitle: 'Auditor' },
-                { id: '12', name: 'Emma Perez', managerId: '8', team: 'Engineering', jobTitle: 'UX Designer' },
-                { id: '13', name: 'Liam Taylor', managerId: '8', team: 'Engineering', jobTitle: 'Frontend Developer' },
-                { id: '14', name: 'Ava Thompson', managerId: '9', team: 'Engineering', jobTitle: 'Backend Developer' },
-                { id: '15', name: 'Mason White', managerId: '7', team: 'Finance', jobTitle: 'Tax Specialist' },
-                { id: '16', name: 'Isabella Harris', managerId: '1', team: 'Leadership', jobTitle: 'COO' },
-                { id: '17', name: 'Ethan Clark', managerId: '16', team: 'Operations', jobTitle: 'Operations Manager' },
-                { id: '18', name: 'Charlotte Lewis', managerId: '16', team: 'Operations', jobTitle: 'Logistics Coordinator' },
-                { id: '19', name: 'Oliver Robinson', managerId: '5', team: 'Engineering', jobTitle: 'DevOps Engineer' },
-                { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' }
-            ];
+    <script>
+        const employeeData = [
+            { id: '1', name: 'John Doe', managerId: null, team: 'Leadership', jobTitle: 'CEO' },
+            { id: '2', name: 'Jane Smith', managerId: '1', team: 'Leadership', jobTitle: 'CTO' },
+            { id: '3', name: 'James Brown', managerId: '1', team: 'Leadership', jobTitle: 'CFO' },
+            { id: '4', name: 'Emily Davis', managerId: '2', team: 'Engineering', jobTitle: 'Lead Engineer' },
+            { id: '5', name: 'Michael Johnson', managerId: '2', team: 'Engineering', jobTitle: 'Software Engineer' },
+            { id: '6', name: 'Jessica Williams', managerId: '3', team: 'Finance', jobTitle: 'Finance Manager' },
+            { id: '7', name: 'Daniel Wilson', managerId: '3', team: 'Finance', jobTitle: 'Accountant' },
+            { id: '8', name: 'Sophia Martinez', managerId: '4', team: 'Engineering', jobTitle: 'Product Manager' },
+            { id: '9', name: 'David Garcia', managerId: '5', team: 'Engineering', jobTitle: 'QA Engineer' },
+            { id: '10', name: 'Olivia Rodriguez', managerId: '6', team: 'Finance', jobTitle: 'Financial Analyst' },
+            { id: '11', name: 'William Lee', managerId: '6', team: 'Finance', jobTitle: 'Auditor' },
+            { id: '12', name: 'Emma Perez', managerId: '8', team: 'Engineering', jobTitle: 'UX Designer' },
+            { id: '13', name: 'Liam Taylor', managerId: '8', team: 'Engineering', jobTitle: 'Frontend Developer' },
+            { id: '14', name: 'Ava Thompson', managerId: '9', team: 'Engineering', jobTitle: 'Backend Developer' },
+            { id: '15', name: 'Mason White', managerId: '7', team: 'Finance', jobTitle: 'Tax Specialist' },
+            { id: '16', name: 'Isabella Harris', managerId: '1', team: 'Leadership', jobTitle: 'COO' },
+            { id: '17', name: 'Ethan Clark', managerId: '16', team: 'Operations', jobTitle: 'Operations Manager' },
+            { id: '18', name: 'Charlotte Lewis', managerId: '16', team: 'Operations', jobTitle: 'Logistics Coordinator' },
+            { id: '19', name: 'Oliver Robinson', managerId: '5', team: 'Engineering', jobTitle: 'DevOps Engineer' },
+            { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' }
+        ];
 
-            const width = window.innerWidth;
-            const height = window.innerHeight;
+        // Initialize the Org Chart
+        const width = window.innerWidth;
+        const height = window.innerHeight;
 
-            const svg = d3.select("#orgChart").append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .call(d3.zoom().on("zoom", zoomed)) // Add zoom behavior
-                .append("g"); // Group to apply zoom transformations
+        const svg = d3.select("#orgChart").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .call(d3.zoom().on("zoom", zoomed)) // Add zoom behavior
+            .append("g"); // Group to apply zoom transformations
 
-            const root = d3.stratify()
-                .id((d) => d.id)
-                .parentId((d) => d.managerId)(employeeData);
+        const root = d3.stratify()
+            .id((d) => d.id)
+            .parentId((d) => d.managerId)(employeeData);
 
-            const treeLayout = d3.tree()
-                .nodeSize([120, 150])  // Reduce vertical/horizontal spacing for compact layout
-                .separation((a, b) => a.parent === b.parent ? 1 : 1.5);
+        const treeLayout = d3.tree()
+            .nodeSize([120, 150])  // Reduce vertical/horizontal spacing for compact layout
+            .separation((a, b) => a.parent === b.parent ? 1 : 1.5);
 
-            let treeData = treeLayout(root);
-            let nodes = treeData.descendants();
-            let links = treeData.links();
+        let treeData = treeLayout(root);
+        let nodes = treeData.descendants();
+        let links = treeData.links();
 
-            // Collapse nodes at first render
-            nodes.forEach((d) => {
-                if (d.depth === 1) {
-                    collapse(d);
-                }
-            });
-
-            update(root);
-
-            function update(source) {
-                treeData = treeLayout(root);
-                nodes = treeData.descendants();
-                links = treeData.links();
-
-                svg.selectAll("*").remove();
-
-                // Render links (force all lines to have uniform thickness)
-                const link = svg.selectAll(".link")
-                    .data(links)
-                    .enter().append("path")
-                    .attr("class", "link")
-                    .attr("d", d3.linkVertical()  // Changed to `linkVertical` for vertical layout
-                        .x((d) => d.x)
-                        .y((d) => d.y)
-                    )
-                    .attr("stroke-width", "2px");
-
-                const node = svg.selectAll(".node")
-                    .data(nodes)
-                    .enter().append("g")
-                    .attr("class", "node")
-                    .attr("transform", (d) => `translate(${d.x},${d.y})`);
-
-                // Create a card (rectangle) for each node
-                node.append("rect")
-                    .attr("width", 120)
-                    .attr("height", 60)  // Adjust card size for compact layout
-                    .attr("x", -60) // Center the rectangle horizontally
-                    .attr("y", -30) // Center the rectangle vertically
-                    .style("fill", "#fff")
-                    .on("click", click);
-
-                // Add employee name inside the card
-                node.append("text")
-                    .attr("dy", "-5px")
-                    .attr("y", -10)
-                    .style("text-anchor", "middle")
-                    .text((d) => d.data.name);
-
-                // Add job title below the name
-                node.append("text")
-                    .attr("dy", "15px")
-                    .style("text-anchor", "middle")
-                    .text((d) => d.data.jobTitle);
+        // Collapse nodes at first render
+        nodes.forEach((d) => {
+            if (d.depth === 1) {
+                collapse(d);
             }
+        });
 
-          function click(event, d) {
-    d.children ? collapse(d) : expand(d);
-    update(d);
-}
+        update(root);
 
-function expand(d) {
-    if (d._children) {
-        d.children = d._children;
-        d._children = null;
-    }
-}
+        function update(source) {
+            treeData = treeLayout(root);
+            nodes = treeData.descendants();
+            links = treeData.links();
 
-function collapse(d) {
-    if (d.children) {
-        d._children = d.children;
-        d.children = null;
-    }
-}
+            svg.selectAll("*").remove();
 
+            // Render links (force all lines to have uniform thickness)
+            const link = svg.selectAll(".link")
+                .data(links)
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("d", d3.linkVertical()  // Changed to `linkVertical` for vertical layout
+                    .x((d) => d.x)
+                    .y((d) => d.y)
+                )
+                .attr("stroke-width", "2px");
 
+            const node = svg.selectAll(".node")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .attr("transform", (d) => `translate(${d.x},${d.y})`);
+
+            // Create a card (rectangle) for each node
+            node.append("rect")
+                .attr("width", 120)
+                .attr("height", 60)  // Adjust card size for compact layout
+                .attr("x", -60) // Center the rectangle horizontally
+                .attr("y", -30) // Center the rectangle vertically
+                .style("fill", "#fff")
+                .on("click", (event, d) => {
+                    d.children = d.children ? null : d._children;
+                    update(d);
+                });
+
+            // Add text to nodes
+            node.append("text")
+                .attr("dy", ".35em")
+                .attr("text-anchor", "middle")
+                .text((d) => d.data.name)
+                .style("font-size", "12px")
+                .style("fill", "#333");
+
+            // Handle zoom
             function zoomed(event) {
                 svg.attr("transform", event.transform);
             }
+        }
 
-            // Button functionalities
-            document.getElementById('collapseAllBtn').addEventListener('click', () => {
-                nodes.forEach(collapse);
-                update(root);
+        function collapse(d) {
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            }
+        }
+
+        function expand(d) {
+            if (d._children) {
+                d.children = d._children;
+                d._children = null;
+            }
+        }
+
+        function expandAll() {
+            nodes.forEach((d) => expand(d));
+            update(root);
+        }
+
+        function collapseAll() {
+            nodes.forEach((d) => {
+                if (d.depth !== 0) {
+                    collapse(d);
+                }
             });
+            update(root);
+        }
 
-            document.getElementById('expandAllBtn').addEventListener('click', () => {
-                nodes.forEach((d) => d._children && (d.children = d._children, d._children = null));
-                update(root);
+        // Zoom functionality
+        d3.select("#zoomSlider").on("input", function () {
+            const scaleValue = d3.select(this).property("value");
+            svg.attr("transform", `scale(${scaleValue})`);
+        });
+
+        d3.select("#collapseAllBtn").on("click", collapseAll);
+        d3.select("#expandAllBtn").on("click", expandAll);
+        d3.select("#expandLevelDropdown").on("change", function () {
+            const level = +this.value;
+            nodes.forEach((d) => {
+                if (d.depth < level) expand(d);
+                else collapse(d);
             });
+            update(root);
+        });
 
-            document.getElementById('expandLevelDropdown').addEventListener('change', (e) => {
-                const level = parseInt(e.target.value);
-                nodes.forEach((d) => {
-                    if (d.depth > level) {
-                        collapse(d);
-                    } else {
-                        d.children = d._children;
-                    }
-                });
-                update(root);
+        // Toggle between Org Chart and Employee Data views
+        d3.select("#toggleViewBtn").on("click", function() {
+            const orgChartDiv = document.getElementById("orgChart");
+            const employeeDataDiv = document.getElementById("employeeData");
+            if (orgChartDiv.style.display === "none") {
+                orgChartDiv.style.display = "block";
+                employeeDataDiv.style.display = "none";
+                this.innerText = "Show Employee Data"; // Change button text
+            } else {
+                orgChartDiv.style.display = "none";
+                employeeDataDiv.style.display = "block";
+                this.innerText = "Show Org Chart"; // Change button text
+                renderTable(); // Render the employee data table
+            }
+        });
+
+        function renderTable() {
+            const tbody = document.getElementById('employeeTable').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = ""; // Clear existing rows
+
+            employeeData.forEach(employee => {
+                const row = tbody.insertRow();
+                row.insertCell(0).innerText = employee.id;
+                row.insertCell(1).innerText = employee.name;
+                row.insertCell(2).innerText = employee.managerId;
+                row.insertCell(3).innerText = employee.team;
+                row.insertCell(4).innerText = employee.jobTitle;
+
+                const actionsCell = row.insertCell(5);
+                actionsCell.innerHTML = `
+                    <span class="edit-btn" onclick="editEmployee('${employee.id}')">Edit</span> |
+                    <span class="delete-btn" onclick="deleteEmployee('${employee.id}')">Delete</span>
+                `;
             });
+        }
 
-            // Navigation functionality
-            document.getElementById('showOrgChartBtn').addEventListener('click', () => {
-                document.getElementById('orgChart').style.display = 'block';
-                document.getElementById('employeeTable').style.display = 'none';
-            });
+        function editEmployee(id) {
+            const employee = employeeData.find(emp => emp.id === id);
+            const newName = prompt("Edit Name:", employee.name);
+            const newManagerId = prompt("Edit Manager ID:", employee.managerId);
+            const newTeam = prompt("Edit Team:", employee.team);
+            const newJobTitle = prompt("Edit Job Title:", employee.jobTitle);
 
-            document.getElementById('showEmployeeTableBtn').addEventListener('click', () => {
-                document.getElementById('orgChart').style.display = 'none';
-                document.getElementById('employeeTable').style.display = 'table';
-            });
-        </script>
-    </div>
+            if (newName !== null) employee.name = newName;
+            if (newManagerId !== null) employee.managerId = newManagerId;
+            if (newTeam !== null) employee.team = newTeam;
+            if (newJobTitle !== null) employee.jobTitle = newJobTitle;
 
-    <!-- Employee Table Section -->
-    <table id="employeeTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Manager ID</th>
-                <th>Team</th>
-                <th>Job Title</th>
-            </tr>
-        </thead>
-        <tbody>
-            <script>
-                employeeData.forEach((employee) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${employee.id}</td>
-                        <td>${employee.name}</td>
-                        <td>${employee.managerId}</td>
-                        <td>${employee.team}</td>
-                        <td>${employee.jobTitle}</td>
-                    `;
-                    document.querySelector('#employeeTable tbody').appendChild(row);
-                });
-            </script>
-        </tbody>
-    </table>
+            renderTable();
+        }
+
+        function deleteEmployee(id) {
+            const index = employeeData.findIndex(emp => emp.id === id);
+            if (index > -1) {
+                employeeData.splice(index, 1);
+                renderTable();
+            }
+        }
+
+        // Initial render of the table
+        renderTable();
+    </script>
 </body>
 </html>
