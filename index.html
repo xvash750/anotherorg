@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collapsible Org Chart with Adjusted Spacing</title>
+    <title>Collapsible Org Chart with Zoom Slider</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -19,11 +19,20 @@
             stroke: #3182bd;
             stroke-width: 1.5px;
         }
+        #zoomSlider {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
+    <!-- Zoom Slider -->
+    <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.1" value="1" />
+
     <script>
-       const employeeData = [
+      const employeeData = [
     { id: '1', name: 'John Doe', managerId: null },
     { id: '2', name: 'Jane Smith', managerId: '1' },
     { id: '3', name: 'James Brown', managerId: '1' },
@@ -171,23 +180,24 @@
 
         const svg = d3.select("body").append("svg")
             .attr("width", width)
-            .attr("height", height);
+            .attr("height", height)
+            .call(d3.zoom().on("zoom", zoomed)) // Add zoom behavior
+            .append("g"); // Group to apply zoom transformations
 
         const root = d3.stratify()
             .id((d) => d.id)
             .parentId((d) => d.managerId)(employeeData);
 
-        // Adjust the layout to include more separation
         const treeLayout = d3.tree()
-            .nodeSize([100, 300]) // Increase the vertical and horizontal spacing between nodes
-            .separation((a, b) => a.parent === b.parent ? 1.5 : 2); // Increase sibling spacing
+            .nodeSize([100, 300])
+            .separation((a, b) => a.parent === b.parent ? 1.5 : 2);
 
         const treeData = treeLayout(root);
 
         let nodes = treeData.descendants();
         let links = treeData.links();
 
-        // Collapse all nodes initially
+        // Collapse nodes at first render
         nodes.forEach((d) => {
             if (d.depth === 1) {
                 collapse(d);
@@ -230,14 +240,9 @@
                 .text((d) => d.data.name);
         }
 
-        // Toggle children on click
-        function click(event, d) {
-            if (d.children) {
-                collapse(d);
-            } else {
-                expand(d);
-            }
-            update(d);
+        // Zoom behavior function
+        function zoomed(event) {
+            svg.attr("transform", event.transform);
         }
 
         // Collapse node by hiding its children
@@ -256,11 +261,30 @@
             }
         }
 
+        // Toggle children on click
+        function click(event, d) {
+            if (d.children) {
+                collapse(d);
+            } else {
+                expand(d);
+            }
+            update(d);
+        }
+
+        // Handle zoom slider changes
+        const zoomSlider = document.getElementById('zoomSlider');
+        zoomSlider.addEventListener('input', function () {
+            const zoomLevel = parseFloat(zoomSlider.value);
+            svg.attr("transform", `scale(${zoomLevel})`);
+        });
+
+        // Automatically resize the tree when window size changes
         window.addEventListener('resize', () => {
             const newWidth = window.innerWidth;
             const newHeight = window.innerHeight;
 
-            svg.attr("width", newWidth)
+            d3.select("svg")
+                .attr("width", newWidth)
                 .attr("height", newHeight);
 
             treeLayout.size([newHeight - 100, newWidth - 100]);
