@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Org Chart</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .org-chart ul {
+            padding-top: 20px;
+            position: relative;
+            list-style-type: none;
+        }
+
+        .org-chart li {
+            display: inline-block;
+            vertical-align: top;
+            text-align: center;
+            list-style-type: none;
+            position: relative;
+            padding: 20px 5px 0 5px;
+        }
+
+        .org-chart li::before, .org-chart li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            border-top: 2px solid #ccc;
+            width: 50%;
+            height: 20px;
+        }
+
+        .org-chart li::before {
+            left: -50%;
+        }
+
+        .org-chart li::after {
+            right: -50%;
+        }
+
+        .org-chart li:only-child::before, .org-chart li:only-child::after {
+            display: none;
+        }
+
+        .org-chart li:only-child {
+            padding-top: 0;
+        }
+
+        .org-chart li:first-child::before, .org-chart li:last-child::after {
+            border: 0;
+        }
+
+        .org-chart li:last-child::before {
+            border-right: 2px solid #ccc;
+        }
+
+        .org-chart li:first-child::after {
+            border-left: 2px solid #ccc;
+        }
+
+        .org-chart .box {
+            padding: 10px;
+            border: 2px solid #ccc;
+            display: inline-block;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .org-chart .box .title {
+            font-weight: bold;
+        }
+
+        .org-chart .box .name {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="org-chart">
+    <ul>
+        <li>
+            <div class="box">
+                <div class="title">CEO</div>
+                <div class="name">John Doe</div>
+            </div>
+            <ul>
+                <li>
+                    <div class="box">
+                        <div class="title">Manager</div>
+                        <div class="name">Jane Smith</div>
+                    </div>
+                    <ul>
+                        <li>
+                            <div class="box">
+                                <div class="title">Team Lead</div>
+                                <div class="name">Mark Johnson</div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="box">
+                                <div class="title">Team Lead</div>
+                                <div class="name">Emma Williams</div>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="box">
+                        <div class="title">Manager</div>
+                        <div class="name">James Brown</div>
+                    </div>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>
