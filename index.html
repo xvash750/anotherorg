@@ -175,7 +175,9 @@
             .id((d) => d.id)
             .parentId((d) => d.managerId)(employeeData);
 
-        const treeLayout = d3.tree().size([height - 100, width - 100]);
+      const treeLayout = d3.tree()
+            .size([height - 100, width - 100])
+            .separation((a, b) => a.parent === b.parent ? 1.5 : 2); 
         const treeData = treeLayout(root);
 
         const nodes = treeData.descendants();
