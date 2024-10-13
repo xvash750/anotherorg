@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compact Columnar Org Chart with Cards</title>
+    <title>Org Chart and Employee Data</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
+            font-family: Arial, sans-serif;
         }
         svg {
             background-color: #f4f4f4;
@@ -32,7 +33,7 @@
             stroke: #999;
             stroke-width: 2px;
         }
-        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandLevelDropdown {
+        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandLevelDropdown, #navButtons {
             position: absolute;
             top: 10px;
             z-index: 10;
@@ -49,225 +50,279 @@
         #expandLevelDropdown {
             left: 350px;
         }
+        #navButtons {
+            left: 450px;
+        }
+        table {
+            margin: 20px;
+            border-collapse: collapse;
+            width: 90%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <!-- Zoom Slider -->
-    <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.1" value="1" />
-    <!-- Collapse/Expand All Buttons -->
-    <button id="collapseAllBtn">Collapse All</button>
-    <button id="expandAllBtn">Expand All</button>
-    <!-- Level Control Dropdown -->
-    <select id="expandLevelDropdown">
-        <option value="1">Expand to Level 1</option>
-        <option value="2" selected>Expand to Level 2</option>
-        <option value="3">Expand to Level 3</option>
-        <option value="4">Expand to Level 4</option>
-        <option value="5">Expand to Level 5</option>
-    </select>
+    <!-- Navigation Buttons -->
+    <div id="navButtons">
+        <button id="showOrgChart">Show Org Chart</button>
+        <button id="showEmployeeData">Show Employee Data</button>
+    </div>
+
+    <!-- Page 1: Organizational Chart -->
+    <div id="orgChartPage">
+        <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.1" value="1" />
+        <button id="collapseAllBtn">Collapse All</button>
+        <button id="expandAllBtn">Expand All</button>
+        <select id="expandLevelDropdown">
+            <option value="1">Expand to Level 1</option>
+            <option value="2" selected>Expand to Level 2</option>
+            <option value="3">Expand to Level 3</option>
+            <option value="4">Expand to Level 4</option>
+            <option value="5">Expand to Level 5</option>
+        </select>
+
+        <script>
+            const employeeData = [
+                { id: '1', name: 'John Doe', managerId: null, team: 'Leadership', jobTitle: 'CEO' },
+                { id: '2', name: 'Jane Smith', managerId: '1', team: 'Leadership', jobTitle: 'CTO' },
+                { id: '3', name: 'James Brown', managerId: '1', team: 'Leadership', jobTitle: 'CFO' },
+                { id: '4', name: 'Emily Davis', managerId: '2', team: 'Engineering', jobTitle: 'Lead Engineer' },
+                { id: '5', name: 'Michael Johnson', managerId: '2', team: 'Engineering', jobTitle: 'Software Engineer' },
+                { id: '6', name: 'Jessica Williams', managerId: '3', team: 'Finance', jobTitle: 'Finance Manager' },
+                { id: '7', name: 'Daniel Wilson', managerId: '3', team: 'Finance', jobTitle: 'Accountant' },
+                { id: '8', name: 'Sophia Martinez', managerId: '4', team: 'Engineering', jobTitle: 'Product Manager' },
+                { id: '9', name: 'David Garcia', managerId: '5', team: 'Engineering', jobTitle: 'QA Engineer' },
+                { id: '10', name: 'Olivia Rodriguez', managerId: '6', team: 'Finance', jobTitle: 'Financial Analyst' },
+                { id: '11', name: 'William Lee', managerId: '6', team: 'Finance', jobTitle: 'Auditor' },
+                { id: '12', name: 'Emma Perez', managerId: '8', team: 'Engineering', jobTitle: 'UX Designer' },
+                { id: '13', name: 'Liam Taylor', managerId: '8', team: 'Engineering', jobTitle: 'Frontend Developer' },
+                { id: '14', name: 'Ava Thompson', managerId: '9', team: 'Engineering', jobTitle: 'Backend Developer' },
+                { id: '15', name: 'Mason White', managerId: '7', team: 'Finance', jobTitle: 'Tax Specialist' },
+                { id: '16', name: 'Isabella Harris', managerId: '1', team: 'Leadership', jobTitle: 'COO' },
+                { id: '17', name: 'Ethan Clark', managerId: '16', team: 'Operations', jobTitle: 'Operations Manager' },
+                { id: '18', name: 'Charlotte Lewis', managerId: '16', team: 'Operations', jobTitle: 'Logistics Coordinator' },
+                { id: '19', name: 'Oliver Robinson', managerId: '5', team: 'Engineering', jobTitle: 'DevOps Engineer' },
+                { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' }
+            ];
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            const svg = d3.select("#orgChartPage").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .call(d3.zoom().on("zoom", zoomed)) // Add zoom behavior
+                .append("g"); // Group to apply zoom transformations
+
+            const root = d3.stratify()
+                .id((d) => d.id)
+                .parentId((d) => d.managerId)(employeeData);
+
+            const treeLayout = d3.tree()
+                .nodeSize([120, 150])  // Reduce vertical/horizontal spacing for compact layout
+                .separation((a, b) => a.parent === b.parent ? 1 : 1.5);
+
+            let treeData = treeLayout(root);
+            let nodes = treeData.descendants();
+            let links = treeData.links();
+
+            // Collapse nodes at first render
+            nodes.forEach((d) => {
+                if (d.depth === 1) {
+                    collapse(d);
+                }
+            });
+
+            update(root);
+
+            // Function to count total descendants
+            function countDescendants(node) {
+                if (!node.children || node.children.length === 0) {
+                    return 0; // No children means no descendants
+                }
+                return node.children.length + node.children.reduce((acc, child) => acc + countDescendants(child), 0);
+            }
+
+            function update(source) {
+                treeData = treeLayout(root);
+                nodes = treeData.descendants();
+                links = treeData.links();
+
+                svg.selectAll("*").remove();
+
+                // Render links (force all lines to have uniform thickness)
+                const link = svg.selectAll(".link")
+                    .data(links)
+                    .enter().append("path")
+                    .attr("class", "link")
+                    .attr("d", d3.linkVertical()  // Changed to `linkVertical` for vertical layout
+                        .x((d) => d.x)
+                        .y((d) => d.y)
+                    )
+                    .attr("stroke-width", "2px");
+
+                const node = svg.selectAll(".node")
+                    .data(nodes)
+                    .enter().append("g")
+                    .attr("class", "node")
+                    .attr("transform", (d) => `translate(${d.x},${d.y})`);
+
+                // Create a card (rectangle) for each node
+                node.append("rect")
+                    .attr("width", 120)
+                    .attr("height", 80)  // Adjust card size for extra text
+                    .attr("x", -60) // Center the rectangle horizontally
+                    .attr("y", -40) // Center the rectangle vertically
+                    .style("fill", "#fff")
+                    .on("click", click);
+
+                // Add employee name inside the card
+                node.append("text")
+                    .attr("dy", "-15px")
+                    .attr("y", -10)
+                    .style("text-anchor", "middle")
+                    .text((d) => d.data.name);
+
+                // Add team inside the card
+                node.append("text")
+                    .attr("dy", "1.2em") // Adjust to place below the name
+                    .attr("y", 10)
+                    .style("text-anchor", "middle")
+                    .style("font-size", "10px")
+                    .style("fill", "gray")
+                    .text((d) => d.data.team);
+
+                // Add job title inside the card
+                node.append("text")
+                    .attr("dy", "2.5em") // Adjust to place below the team
+                    .attr("y", 30)
+                    .style("text-anchor", "middle")
+                    .style("font-size", "10px")
+                    .style("fill", "gray")
+                    .text((d) => d.data.jobTitle);
+
+                // Add reports count inside the card
+                node.append("text")
+                    .attr("dy", "3.5em") // Adjust to place below the job title
+                    .attr("y", 50) // Offset vertically from the top of the card
+                    .style("text-anchor", "middle")
+                    .style("font-size", "10px")
+                    .style("fill", "gray")
+                    .text((d) => `Reports: ${countDescendants(d)}`);
+
+                // Update node styles based on depth
+                node.select("rect")
+                    .style("fill", (d) => d.depth === 0 ? "#f8d7da" : d.depth === 1 ? "#ffeeba" : "#d4edda");
+
+                // Handle collapsing and expanding on click
+                function click(event, d) {
+                    d.children = d.children ? null : d._children;
+                    update(d);
+                }
+            }
+
+            // Collapse function
+            function collapse(node) {
+                if (node.children) {
+                    node._children = node.children; // Store children for later use
+                    node.children = null; // Collapse
+                }
+            }
+
+            // Zoom function
+            function zoomed(event) {
+                svg.attr("transform", event.transform);
+            }
+
+            // Event listeners for buttons and zoom slider
+            d3.select("#collapseAllBtn").on("click", () => {
+                nodes.forEach((d) => {
+                    if (d.depth > 0) collapse(d);
+                });
+                update(root);
+            });
+
+            d3.select("#expandAllBtn").on("click", () => {
+                nodes.forEach((d) => {
+                    if (d._children) {
+                        d.children = d._children; // Restore children
+                        d._children = null; // Remove the temporary property
+                    }
+                });
+                update(root);
+            });
+
+            d3.select("#expandLevelDropdown").on("change", function () {
+                const selectedLevel = +this.value;
+                nodes.forEach((d) => {
+                    if (d.depth > selectedLevel) {
+                        collapse(d);
+                    } else {
+                        d.children = d._children; // Restore children
+                    }
+                });
+                update(root);
+            });
+
+            // Zoom functionality
+            d3.select("#zoomSlider").on("input", function () {
+                const zoomLevel = this.value;
+                svg.attr("transform", `scale(${zoomLevel})`);
+            });
+        </script>
+    </div>
+
+    <!-- Page 2: Employee Data Table -->
+    <div id="employeeDataPage" class="hidden">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Manager ID</th>
+                    <th>Team</th>
+                    <th>Job Title</th>
+                </tr>
+            </thead>
+            <tbody>
+                <script>
+                    // Populate table with employee data
+                    const tableBody = d3.select("tbody");
+                    employeeData.forEach((employee) => {
+                        tableBody.append("tr")
+                            .html(`
+                                <td>${employee.id}</td>
+                                <td>${employee.name}</td>
+                                <td>${employee.managerId || 'N/A'}</td>
+                                <td>${employee.team}</td>
+                                <td>${employee.jobTitle}</td>
+                            `);
+                    });
+                </script>
+            </tbody>
+        </table>
+    </div>
 
     <script>
-      const employeeData = [
-    { id: '1', name: 'John Doe', managerId: null, team: 'Leadership', jobTitle: 'CEO' },
-    { id: '2', name: 'Jane Smith', managerId: '1', team: 'Leadership', jobTitle: 'CTO' },
-    { id: '3', name: 'James Brown', managerId: '1', team: 'Leadership', jobTitle: 'CFO' },
-    { id: '4', name: 'Emily Davis', managerId: '2', team: 'Engineering', jobTitle: 'Lead Engineer' },
-    { id: '5', name: 'Michael Johnson', managerId: '2', team: 'Engineering', jobTitle: 'Software Engineer' },
-    { id: '6', name: 'Jessica Williams', managerId: '3', team: 'Finance', jobTitle: 'Finance Manager' },
-    { id: '7', name: 'Daniel Wilson', managerId: '3', team: 'Finance', jobTitle: 'Accountant' },
-    { id: '8', name: 'Sophia Martinez', managerId: '4', team: 'Engineering', jobTitle: 'Product Manager' },
-    { id: '9', name: 'David Garcia', managerId: '5', team: 'Engineering', jobTitle: 'QA Engineer' },
-    { id: '10', name: 'Olivia Rodriguez', managerId: '6', team: 'Finance', jobTitle: 'Financial Analyst' },
-    { id: '11', name: 'William Lee', managerId: '6', team: 'Finance', jobTitle: 'Auditor' },
-    { id: '12', name: 'Emma Perez', managerId: '8', team: 'Engineering', jobTitle: 'UX Designer' },
-    { id: '13', name: 'Liam Taylor', managerId: '8', team: 'Engineering', jobTitle: 'Frontend Developer' },
-    { id: '14', name: 'Ava Thompson', managerId: '9', team: 'Engineering', jobTitle: 'Backend Developer' },
-    { id: '15', name: 'Mason White', managerId: '7', team: 'Finance', jobTitle: 'Tax Specialist' },
-    { id: '16', name: 'Isabella Harris', managerId: '1', team: 'Leadership', jobTitle: 'COO' },
-    { id: '17', name: 'Ethan Clark', managerId: '16', team: 'Operations', jobTitle: 'Operations Manager' },
-    { id: '18', name: 'Charlotte Lewis', managerId: '16', team: 'Operations', jobTitle: 'Logistics Coordinator' },
-    { id: '19', name: 'Oliver Robinson', managerId: '5', team: 'Engineering', jobTitle: 'DevOps Engineer' },
-    { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' }
-    // Add more entries as needed
-];
-
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-
-        const svg = d3.select("body").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .call(d3.zoom().on("zoom", zoomed)) // Add zoom behavior
-            .append("g"); // Group to apply zoom transformations
-
-        const root = d3.stratify()
-            .id((d) => d.id)
-            .parentId((d) => d.managerId)(employeeData);
-
-        const treeLayout = d3.tree()
-            .nodeSize([120, 150])  // Reduce vertical/horizontal spacing for compact layout
-            .separation((a, b) => a.parent === b.parent ? 1 : 1.5);
-
-        let treeData = treeLayout(root);
-        let nodes = treeData.descendants();
-        let links = treeData.links();
-
-        // Collapse nodes at first render
-        nodes.forEach((d) => {
-            if (d.depth === 1) {
-                collapse(d);
-            }
+        // Navigation event listeners
+        document.getElementById("showOrgChart").addEventListener("click", function () {
+            document.getElementById("orgChartPage").classList.remove("hidden");
+            document.getElementById("employeeDataPage").classList.add("hidden");
         });
 
-        update(root);
-
-        function update(source) {
-            treeData = treeLayout(root);
-            nodes = treeData.descendants();
-            links = treeData.links();
-
-            svg.selectAll("*").remove();
-
-            // Render links (force all lines to have uniform thickness)
-            const link = svg.selectAll(".link")
-                .data(links)
-                .enter().append("path")
-                .attr("class", "link")
-                .attr("d", d3.linkVertical()  // Changed to `linkVertical` for vertical layout
-                    .x((d) => d.x)
-                    .y((d) => d.y)
-                )
-                .attr("stroke-width", "2px");
-
-            const node = svg.selectAll(".node")
-                .data(nodes)
-                .enter().append("g")
-                .attr("class", "node")
-                .attr("transform", (d) => `translate(${d.x},${d.y})`);
-
-            // Create a card (rectangle) for each node
-            node.append("rect")
-                .attr("width", 120)
-                .attr("height", 60)  // Adjust card size for compact layout
-                .attr("x", -60) // Center the rectangle horizontally
-                .attr("y", -30) // Center the rectangle vertically
-                .style("fill", "#fff")
-                .on("click", click);
-
-       // Add employee name inside the card
-node.append("text")
-    .attr("dy", "-5px")
-    .attr("y", -10)
-    .style("text-anchor", "middle")
-    .text((d) => d.data.name);
-
-// Add employee position inside the card
-node.append("text")
-    .attr("dy", "1.2em") // Adjust to place below the name
-    .attr("y", -5) // Offset vertically from the top of the card
-    .style("text-anchor", "middle")
-    .style("font-size", "10px")
-    .text((d) => d.data.team);
-// Add employee position inside the card
-node.append("text")
-    .attr("dy", "1.2em") // Adjust to place below the name
-    .attr("y", 10) // Offset vertically from the top of the card
-    .style("text-anchor", "middle")
-    .style("font-size", "10px")
-    .text((d) => d.data.jobTitle);
-        }
-
-        // Zoom function
-        function zoomed(event) {
-            svg.attr("transform", event.transform);
-        }
-
-        // Toggle children on click
-        function click(event, d) {
-            if (d.children) {
-                collapse(d);
-            } else {
-                expand(d);
-            }
-            update(d);
-        }
-
-        // Collapse node by hiding its children
-        function collapse(d) {
-            if (d.children) {
-                d._children = d.children;
-                d.children = null;
-            }
-        }
-
-        // Expand node by restoring its children
-        function expand(d) {
-            if (d._children) {
-                d.children = d._children;
-                d._children = null;
-            }
-        }
-
-        // Collapse all nodes
-        function collapseAll() {
-            root.descendants().forEach((d) => {
-                if (d.children) {
-                    collapse(d);
-                }
-            });
-            update(root);
-        }
-
-        // Expand all nodes
-        function expandAll() {
-            root.descendants().forEach((d) => {
-                if (d._children) {
-                    expand(d);
-                }
-            });
-            update(root);
-        }
-
-        // Expand nodes up to a specific level
-        function expandToLevel(level) {
-            root.descendants().forEach((d) => {
-                if (d.depth < level) {
-                    expand(d);
-                } else {
-                    collapse(d);
-                }
-            });
-            update(root);
-        }
-
-        // Handle zoom slider changes
-        const zoomSlider = document.getElementById('zoomSlider');
-        zoomSlider.addEventListener('input', function () {
-            const zoomLevel = parseFloat(zoomSlider.value);
-            svg.attr("transform", `scale(${zoomLevel})`);
-        });
-
-        // Add event listeners for collapse/expand all buttons
-        document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
-        document.getElementById('expandAllBtn').addEventListener('click', expandAll);
-
-        // Add event listener for level control dropdown
-        document.getElementById('expandLevelDropdown').addEventListener('change', function () {
-            const level = parseInt(this.value);
-            expandToLevel(level);
-        });
-
-        // Automatically resize the tree when window size changes
-        window.addEventListener('resize', () => {
-            const newWidth = window.innerWidth;
-            const newHeight = window.innerHeight;
-
-            d3.select("svg")
-                .attr("width", newWidth)
-                .attr("height", newHeight);
-
-            treeLayout.size([newHeight - 100, newWidth - 100]);
-            update(root);
+        document.getElementById("showEmployeeData").addEventListener("click", function () {
+            document.getElementById("orgChartPage").classList.add("hidden");
+            document.getElementById("employeeDataPage").classList.remove("hidden");
         });
     </script>
 </body>
