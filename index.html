@@ -9,14 +9,19 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 50px;
+            padding: 20px;
             background-color: #f4f4f4;
         }
         .org-chart {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 200vh;
+            height: 100vh;
+            overflow: visible;
+        }
+        svg {
+            display: block; /* Ensures the SVG behaves like a block element */
+            margin: auto;  /* Centers the SVG horizontally */
         }
         .node circle {
             fill: steelblue;
@@ -56,19 +61,21 @@
         .attr("width", width)
         .attr("height", height);
 
+    const g = svg.append("g").attr("transform", `translate(100, 100)`); // Centering within the SVG
+
     // Create hierarchy based on managerId and employeeId
     const root = d3.stratify()
         .id(d => d.id)
         .parentId(d => d.managerId)(employeeData);
 
-    const treeLayout = d3.tree().size([width +200 , height ]);
+    const treeLayout = d3.tree().size([height - 200, width - 200]); // Adjust size to fit within the SVG
     const treeData = treeLayout(root);
 
     const nodes = treeData.descendants();
     const links = treeData.links();
 
     // Render the links (lines connecting nodes)
-    svg.selectAll(".link")
+    g.selectAll(".link")
         .data(links)
         .enter().append("path")
         .attr("class", "link")
@@ -78,7 +85,7 @@
         );
 
     // Render the nodes (employee boxes)
-    const nodeEnter = svg.selectAll(".node")
+    const nodeEnter = g.selectAll(".node")
         .data(nodes)
         .enter().append("g")
         .attr("class", "node")
@@ -93,6 +100,16 @@
         .attr("dy", ".35em")
         .attr("y", -25)
         .text(d => d.data.name);
+
+    // Enable zoom functionality
+    const zoom = d3.zoom()
+        .scaleExtent([0.5, 2]) // Set zoom scale limits
+        .on("zoom", (event) => {
+            g.attr("transform", event.transform);
+        });
+
+    svg.call(zoom);
+
 </script>
 
 </body>
