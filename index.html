@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vertical Org Chart with Cards</title>
+    <title>Compact Columnar Org Chart with Cards</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -67,7 +67,7 @@
     </select>
 
     <script>
-       const employeeData = [
+     const employeeData = [
     { id: '1', name: 'John Doe', managerId: null },
     { id: '2', name: 'Jane Smith', managerId: '1' },
     { id: '3', name: 'James Brown', managerId: '1' },
@@ -224,8 +224,8 @@
             .parentId((d) => d.managerId)(employeeData);
 
         const treeLayout = d3.tree()
-            .nodeSize([200, 120])  // Adjust size for card layout
-            .separation((a, b) => a.parent === b.parent ? 1.5 : 2);
+            .nodeSize([120, 150])  // Reduce vertical/horizontal spacing for compact layout
+            .separation((a, b) => a.parent === b.parent ? 1 : 1.5);
 
         let treeData = treeLayout(root);
         let nodes = treeData.descendants();
@@ -267,9 +267,9 @@
             // Create a card (rectangle) for each node
             node.append("rect")
                 .attr("width", 120)
-                .attr("height", 50)
+                .attr("height", 60)  // Adjust card size for compact layout
                 .attr("x", -60) // Center the rectangle horizontally
-                .attr("y", -25) // Center the rectangle vertically
+                .attr("y", -30) // Center the rectangle vertically
                 .style("fill", "#fff")
                 .on("click", click);
 
