@@ -19,7 +19,12 @@
             stroke: #3182bd;
             stroke-width: 1.5px;
         }
-        #zoomSlider, #collapseAllBtn, #expandAllBtn {
+        .link {
+            fill: none;
+            stroke: #999;
+            stroke-width: 2px; /* Uniform stroke width */
+        }
+        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandLevelBtn {
             position: absolute;
             top: 10px;
             z-index: 10;
@@ -33,6 +38,9 @@
         #expandAllBtn {
             left: 250px;
         }
+        #expandLevelBtn {
+            left: 350px;
+        }
     </style>
 </head>
 <body>
@@ -41,6 +49,9 @@
     <!-- Collapse/Expand All Buttons -->
     <button id="collapseAllBtn">Collapse All</button>
     <button id="expandAllBtn">Expand All</button>
+    <!-- Level Control -->
+    <input type="number" id="expandLevelBtn" min="1" max="10" value="2" />
+    <label for="expandLevelBtn">Expand to Level</label>
 
     <script>
         const employeeData = [
@@ -223,6 +234,7 @@
 
             svg.selectAll("*").remove();
 
+            // Render links (force all lines to have uniform thickness)
             const link = svg.selectAll(".link")
                 .data(links)
                 .enter().append("path")
@@ -230,7 +242,8 @@
                 .attr("d", d3.linkHorizontal()
                     .x((d) => d.y)
                     .y((d) => d.x)
-                );
+                )
+                .attr("stroke-width", "2px"); // Uniform stroke width
 
             const node = svg.selectAll(".node")
                 .data(nodes)
@@ -301,6 +314,18 @@
             update(root);
         }
 
+        // Expand nodes up to a specific level
+        function expandToLevel(level) {
+            root.descendants().forEach((d) => {
+                if (d.depth < level) {
+                    expand(d);
+                } else {
+                    collapse(d);
+                }
+            });
+            update(root);
+        }
+
         // Handle zoom slider changes
         const zoomSlider = document.getElementById('zoomSlider');
         zoomSlider.addEventListener('input', function () {
@@ -311,6 +336,12 @@
         // Add event listeners for collapse/expand all buttons
         document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
         document.getElementById('expandAllBtn').addEventListener('click', expandAll);
+
+        // Add event listener for level control
+        document.getElementById('expandLevelBtn').addEventListener('input', function () {
+            const level = parseInt(this.value);
+            expandToLevel(level);
+        });
 
         // Automatically resize the tree when window size changes
         window.addEventListener('resize', () => {
