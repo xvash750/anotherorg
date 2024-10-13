@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collapsible Org Chart</title>
+    <title>Collapsible Org Chart with Adjusted Spacing</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -23,7 +23,7 @@
 </head>
 <body>
     <script>
-        const employeeData = [
+       const employeeData = [
     { id: '1', name: 'John Doe', managerId: null },
     { id: '2', name: 'Jane Smith', managerId: '1' },
     { id: '3', name: 'James Brown', managerId: '1' },
@@ -177,13 +177,17 @@
             .id((d) => d.id)
             .parentId((d) => d.managerId)(employeeData);
 
-        const treeLayout = d3.tree().size([height - 100, width - 100]);
+        // Adjust the layout to include more separation
+        const treeLayout = d3.tree()
+            .nodeSize([100, 300]) // Increase the vertical and horizontal spacing between nodes
+            .separation((a, b) => a.parent === b.parent ? 1.5 : 2); // Increase sibling spacing
+
         const treeData = treeLayout(root);
 
         let nodes = treeData.descendants();
         let links = treeData.links();
 
-        // Collapse all nodes at the start
+        // Collapse all nodes initially
         nodes.forEach((d) => {
             if (d.depth === 1) {
                 collapse(d);
