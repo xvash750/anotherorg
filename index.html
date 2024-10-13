@@ -164,14 +164,14 @@ node.append("text")
 // Add employee position inside the card
 node.append("text")
     .attr("dy", "1.2em") // Adjust to place below the name
-    .attr("y", 10) // Offset vertically from the top of the card
+    .attr("y", -5) // Offset vertically from the top of the card
     .style("text-anchor", "middle")
     .style("font-size", "10px")
     .text((d) => d.data.team);
 // Add employee position inside the card
 node.append("text")
     .attr("dy", "1.2em") // Adjust to place below the name
-    .attr("y", 20) // Offset vertically from the top of the card
+    .attr("y", 0) // Offset vertically from the top of the card
     .style("text-anchor", "middle")
     .style("font-size", "10px")
     .text((d) => d.data.jobTitle);
