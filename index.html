@@ -264,9 +264,8 @@ function collapse(d) {
                         d.children = d._children;
                     }
                 });
-                update(root);
-        }
-
+          update(root);
+            });
         // Zoom functionality
         d3.select("#zoomSlider").on("input", function () {
             const scaleValue = d3.select(this).property("value");
