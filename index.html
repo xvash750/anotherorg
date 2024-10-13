@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collapsible Org Chart with Zoom and Control Buttons</title>
+    <title>Vertical Org Chart with Zoom, Collapse, and Level Control</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -24,7 +24,7 @@
             stroke: #999;
             stroke-width: 2px; /* Uniform stroke width */
         }
-        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandLevelBtn {
+        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandLevelDropdown {
             position: absolute;
             top: 10px;
             z-index: 10;
@@ -38,7 +38,7 @@
         #expandAllBtn {
             left: 250px;
         }
-        #expandLevelBtn {
+        #expandLevelDropdown {
             left: 350px;
         }
     </style>
@@ -49,12 +49,17 @@
     <!-- Collapse/Expand All Buttons -->
     <button id="collapseAllBtn">Collapse All</button>
     <button id="expandAllBtn">Expand All</button>
-    <!-- Level Control -->
-    <input type="number" id="expandLevelBtn" min="1" max="10" value="2" />
-    <label for="expandLevelBtn">Expand to Level</label>
+    <!-- Level Control Dropdown -->
+    <select id="expandLevelDropdown">
+        <option value="1">Expand to Level 1</option>
+        <option value="2" selected>Expand to Level 2</option>
+        <option value="3">Expand to Level 3</option>
+        <option value="4">Expand to Level 4</option>
+        <option value="5">Expand to Level 5</option>
+    </select>
 
     <script>
-        const employeeData = [
+       const employeeData = [
     { id: '1', name: 'John Doe', managerId: null },
     { id: '2', name: 'Jane Smith', managerId: '1' },
     { id: '3', name: 'James Brown', managerId: '1' },
@@ -211,7 +216,7 @@
             .parentId((d) => d.managerId)(employeeData);
 
         const treeLayout = d3.tree()
-            .nodeSize([100, 300])
+            .nodeSize([200, 100])  // Adjust size for vertical layout
             .separation((a, b) => a.parent === b.parent ? 1.5 : 2);
 
         let treeData = treeLayout(root);
@@ -239,9 +244,9 @@
                 .data(links)
                 .enter().append("path")
                 .attr("class", "link")
-                .attr("d", d3.linkHorizontal()
-                    .x((d) => d.y)
-                    .y((d) => d.x)
+                .attr("d", d3.linkVertical()  // Changed to `linkVertical` for vertical layout
+                    .x((d) => d.x) // Swap x and y to make vertical layout
+                    .y((d) => d.y)
                 )
                 .attr("stroke-width", "2px"); // Uniform stroke width
 
@@ -249,7 +254,7 @@
                 .data(nodes)
                 .enter().append("g")
                 .attr("class", "node")
-                .attr("transform", (d) => `translate(${d.y},${d.x})`);
+                .attr("transform", (d) => `translate(${d.x},${d.y})`);
 
             node.append("circle")
                 .attr("r", 20)
@@ -258,7 +263,7 @@
 
             node.append("text")
                 .attr("dy", ".35em")
-                .attr("y", -25)
+                .attr("y", -30)  // Adjust y position for vertical layout
                 .style("text-anchor", "middle")
                 .text((d) => d.data.name);
         }
@@ -337,8 +342,8 @@
         document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
         document.getElementById('expandAllBtn').addEventListener('click', expandAll);
 
-        // Add event listener for level control
-        document.getElementById('expandLevelBtn').addEventListener('input', function () {
+        // Add event listener for level control dropdown
+        document.getElementById('expandLevelDropdown').addEventListener('change', function () {
             const level = parseInt(this.value);
             expandToLevel(level);
         });
