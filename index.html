@@ -196,22 +196,25 @@
                     .text((d) => d.data.jobTitle);
             }
 
-            function click(event, d) {
-                if (d.children) {
-                    d.children.forEach(collapse); // Collapse children if they exist
-                    update(d);
-                } else {
-                    d.children = d._children; // Restore children
-                    update(d);
-                }
-            }
+          function click(event, d) {
+    d.children ? collapse(d) : expand(d);
+    update(d);
+}
 
-            function collapse(d) {
-                if (d.children) {
-                    d._children = d.children;
-                    d.children = null;
-                }
-            }
+function expand(d) {
+    if (d._children) {
+        d.children = d._children;
+        d._children = null;
+    }
+}
+
+function collapse(d) {
+    if (d.children) {
+        d._children = d.children;
+        d.children = null;
+    }
+}
+
 
             function zoomed(event) {
                 svg.attr("transform", event.transform);
