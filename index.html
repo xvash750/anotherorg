@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vertical Org Chart with Zoom, Collapse, and Level Control</title>
+    <title>Vertical Org Chart with Cards</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -14,15 +14,23 @@
         svg {
             background-color: #f4f4f4;
         }
-        .node circle {
+        .node rect {
             cursor: pointer;
-            stroke: #3182bd;
-            stroke-width: 1.5px;
+            fill: #fff;
+            stroke: steelblue;
+            stroke-width: 2px;
+            rx: 10; /* Rounded corners */
+            ry: 10;
+        }
+        .node text {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            fill: #333;
         }
         .link {
             fill: none;
             stroke: #999;
-            stroke-width: 2px; /* Uniform stroke width */
+            stroke-width: 2px;
         }
         #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandLevelDropdown {
             position: absolute;
@@ -216,7 +224,7 @@
             .parentId((d) => d.managerId)(employeeData);
 
         const treeLayout = d3.tree()
-            .nodeSize([200, 100])  // Adjust size for vertical layout
+            .nodeSize([200, 120])  // Adjust size for card layout
             .separation((a, b) => a.parent === b.parent ? 1.5 : 2);
 
         let treeData = treeLayout(root);
@@ -245,10 +253,10 @@
                 .enter().append("path")
                 .attr("class", "link")
                 .attr("d", d3.linkVertical()  // Changed to `linkVertical` for vertical layout
-                    .x((d) => d.x) // Swap x and y to make vertical layout
+                    .x((d) => d.x)
                     .y((d) => d.y)
                 )
-                .attr("stroke-width", "2px"); // Uniform stroke width
+                .attr("stroke-width", "2px");
 
             const node = svg.selectAll(".node")
                 .data(nodes)
@@ -256,16 +264,29 @@
                 .attr("class", "node")
                 .attr("transform", (d) => `translate(${d.x},${d.y})`);
 
-            node.append("circle")
-                .attr("r", 20)
-                .style("fill", (d) => d.children || d._children ? "steelblue" : "#fff")
+            // Create a card (rectangle) for each node
+            node.append("rect")
+                .attr("width", 120)
+                .attr("height", 50)
+                .attr("x", -60) // Center the rectangle horizontally
+                .attr("y", -25) // Center the rectangle vertically
+                .style("fill", "#fff")
                 .on("click", click);
 
+            // Add employee name inside the card
             node.append("text")
-                .attr("dy", ".35em")
-                .attr("y", -30)  // Adjust y position for vertical layout
+                .attr("dy", "-5px")
+                .attr("y", -10)
                 .style("text-anchor", "middle")
                 .text((d) => d.data.name);
+
+            // Add employee position inside the card
+            node.append("text")
+                .attr("dy", ".35em")
+                .attr("y", 10)
+                .style("text-anchor", "middle")
+                .style("font-size", "10px")
+                .text((d) => d.data.position);
         }
 
         // Zoom function
