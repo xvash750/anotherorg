@@ -155,20 +155,21 @@
                 .style("fill", "#fff")
                 .on("click", click);
 
-            // Add employee name inside the card
-            node.append("text")
-                .attr("dy", "-5px")
-                .attr("y", -10)
-                .style("text-anchor", "middle")
-                .text((d) => d.data.name);
+       // Add employee name inside the card
+node.append("text")
+    .attr("dy", "-5px")
+    .attr("y", -10)
+    .style("text-anchor", "middle")
+    .text((d) => d.data.name);
 
-            // Add employee position inside the card
-            node.append("text")
-                .attr("dy", ".35em")
-                .attr("y", 10)
-                .style("text-anchor", "middle")
-                .style("font-size", "10px")
-                .text((d) => d.data.team);
+// Add employee position inside the card
+node.append("text")
+    .attr("dy", "1.2em") // Adjust to place below the name
+    .attr("y", 10) // Offset vertically from the top of the card
+    .style("text-anchor", "middle")
+    .style("font-size", "10px")
+    .text((d) => d.data.team);
+
         }
 
         // Zoom function
