@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collapsible Org Chart with Zoom Slider</title>
+    <title>Collapsible Org Chart with Zoom and Control Buttons</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -19,20 +19,31 @@
             stroke: #3182bd;
             stroke-width: 1.5px;
         }
-        #zoomSlider {
+        #zoomSlider, #collapseAllBtn, #expandAllBtn {
             position: absolute;
             top: 10px;
-            left: 10px;
             z-index: 10;
+        }
+        #zoomSlider {
+            left: 10px;
+        }
+        #collapseAllBtn {
+            left: 150px;
+        }
+        #expandAllBtn {
+            left: 250px;
         }
     </style>
 </head>
 <body>
     <!-- Zoom Slider -->
     <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.1" value="1" />
+    <!-- Collapse/Expand All Buttons -->
+    <button id="collapseAllBtn">Collapse All</button>
+    <button id="expandAllBtn">Expand All</button>
 
     <script>
-      const employeeData = [
+        const employeeData = [
     { id: '1', name: 'John Doe', managerId: null },
     { id: '2', name: 'Jane Smith', managerId: '1' },
     { id: '3', name: 'James Brown', managerId: '1' },
@@ -192,8 +203,7 @@
             .nodeSize([100, 300])
             .separation((a, b) => a.parent === b.parent ? 1.5 : 2);
 
-        const treeData = treeLayout(root);
-
+        let treeData = treeLayout(root);
         let nodes = treeData.descendants();
         let links = treeData.links();
 
@@ -204,12 +214,12 @@
             }
         });
 
-        // Render the initial tree
         update(root);
 
         function update(source) {
-            nodes = treeLayout(root).descendants();
-            links = treeLayout(root).links();
+            treeData = treeLayout(root);
+            nodes = treeData.descendants();
+            links = treeData.links();
 
             svg.selectAll("*").remove();
 
@@ -231,7 +241,7 @@
             node.append("circle")
                 .attr("r", 20)
                 .style("fill", (d) => d.children || d._children ? "steelblue" : "#fff")
-                .on("click", click); // Add click event for collapsing/expanding
+                .on("click", click);
 
             node.append("text")
                 .attr("dy", ".35em")
@@ -240,9 +250,19 @@
                 .text((d) => d.data.name);
         }
 
-        // Zoom behavior function
+        // Zoom function
         function zoomed(event) {
             svg.attr("transform", event.transform);
+        }
+
+        // Toggle children on click
+        function click(event, d) {
+            if (d.children) {
+                collapse(d);
+            } else {
+                expand(d);
+            }
+            update(d);
         }
 
         // Collapse node by hiding its children
@@ -261,14 +281,24 @@
             }
         }
 
-        // Toggle children on click
-        function click(event, d) {
-            if (d.children) {
-                collapse(d);
-            } else {
-                expand(d);
-            }
-            update(d);
+        // Collapse all nodes
+        function collapseAll() {
+            root.descendants().forEach((d) => {
+                if (d.children) {
+                    collapse(d);
+                }
+            });
+            update(root);
+        }
+
+        // Expand all nodes
+        function expandAll() {
+            root.descendants().forEach((d) => {
+                if (d._children) {
+                    expand(d);
+                }
+            });
+            update(root);
         }
 
         // Handle zoom slider changes
@@ -277,6 +307,10 @@
             const zoomLevel = parseFloat(zoomSlider.value);
             svg.attr("transform", `scale(${zoomLevel})`);
         });
+
+        // Add event listeners for collapse/expand all buttons
+        document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
+        document.getElementById('expandAllBtn').addEventListener('click', expandAll);
 
         // Automatically resize the tree when window size changes
         window.addEventListener('resize', () => {
