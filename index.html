@@ -3,51 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Org Chart using D3.js</title>
+    <title>Dynamic Org Chart</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .org-chart {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: visible;
+            padding: 0;
+            overflow: hidden;
         }
         svg {
-            display: block; /* Ensures the SVG behaves like a block element */
-            margin: auto;  /* Centers the SVG horizontally */
-        }
-        .node circle {
-            fill: steelblue;
-            stroke: #fff;
-            stroke-width: 3px;
-        }
-        .link {
-            fill: none;
-            stroke: #ccc;
-            stroke-width: 2px;
-        }
-        text {
-            font-size: 12px;
-            text-anchor: middle;
-            fill: black;
+            background-color: #f4f4f4;
         }
     </style>
 </head>
 <body>
-
-<div class="org-chart" id="chart"></div>
-
-<script>
-    // Sample employee data
-    // Sample employee data with 100 additional random positions
-const employeeData = [
+    <script>
+        // Sample employee data with 100 additional random positions
+      const employeeData = [
     { id: '1', name: 'John Doe', managerId: null },
     { id: '2', name: 'Jane Smith', managerId: '1' },
     { id: '3', name: 'James Brown', managerId: '1' },
@@ -189,62 +161,82 @@ const employeeData = [
 
     ];
 
-    const width = 800, height = 600;
 
-    const svg = d3.select("#chart").append("svg")
-        .attr("width", width)
-        .attr("height", height);
+        // Set dimensions
+        const width = window.innerWidth;
+        const height = window.innerHeight;
 
-    const g = svg.append("g").attr("transform", `translate(100, 100)`); // Centering within the SVG
+        const svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height);
 
-    // Create hierarchy based on managerId and employeeId
-    const root = d3.stratify()
-        .id(d => d.id)
-        .parentId(d => d.managerId)(employeeData);
+        // Create hierarchy based on managerId and employeeId
+        const root = d3.stratify()
+            .id((d) => d.id)
+            .parentId((d) => d.managerId)(employeeData);
 
-    const treeLayout = d3.tree().size([height - 200, width - 200]); // Adjust size to fit within the SVG
-    const treeData = treeLayout(root);
+        const treeLayout = d3.tree().size([height - 100, width - 100]);
+        const treeData = treeLayout(root);
 
-    const nodes = treeData.descendants();
-    const links = treeData.links();
+        const nodes = treeData.descendants();
+        const links = treeData.links();
 
-    // Render the links (lines connecting nodes)
-    g.selectAll(".link")
-        .data(links)
-        .enter().append("path")
-        .attr("class", "link")
-        .attr("d", d3.linkHorizontal()
-            .x(d => d.y)
-            .y(d => d.x)
-        );
+        // Render the links (lines connecting nodes)
+        svg.selectAll(".link")
+            .data(links)
+            .enter().append("path")
+            .attr("class", "link")
+            .attr("d", d3.linkHorizontal()
+                .x((d) => d.y)
+                .y((d) => d.x)
+            );
 
-    // Render the nodes (employee boxes)
-    const nodeEnter = g.selectAll(".node")
-        .data(nodes)
-        .enter().append("g")
-        .attr("class", "node")
-        .attr("transform", d => `translate(${d.y},${d.x})`);
+        // Render the nodes (employee boxes)
+        const nodeEnter = svg.selectAll(".node")
+            .data(nodes)
+            .enter().append("g")
+            .attr("class", "node")
+            .attr("transform", (d) => `translate(${d.y},${d.x})`);
 
-    // Add circles for employees
-    nodeEnter.append("circle")
-        .attr("r", 20);
+        // Add circles for employees
+        nodeEnter.append("circle")
+            .attr("r", 20)
+            .style("fill", "steelblue");
 
-    // Add employee names
-    nodeEnter.append("text")
-        .attr("dy", ".35em")
-        .attr("y", -25)
-        .text(d => d.data.name);
+        // Add employee names
+        nodeEnter.append("text")
+            .attr("dy", ".35em")
+            .attr("y", -25)
+            .style("text-anchor", "middle")
+            .text((d) => d.data.name);
 
-    // Enable zoom functionality
-    const zoom = d3.zoom()
-        .scaleExtent([0.5, 2]) // Set zoom scale limits
-        .on("zoom", (event) => {
-            g.attr("transform", event.transform);
+        // Handle window resizing
+        window.addEventListener('resize', () => {
+            const newWidth = window.innerWidth;
+            const newHeight = window.innerHeight;
+
+            svg.attr("width", newWidth)
+                .attr("height", newHeight);
+
+            // Redraw the tree
+            treeLayout.size([newHeight - 100, newWidth - 100]);
+            const newTreeData = treeLayout(root);
+
+            // Update links
+            svg.selectAll(".link")
+                .data(newTreeData.links())
+                .attr("d", d3.linkHorizontal()
+                    .x((d) => d.y)
+                    .y((d) => d.x)
+                );
+
+            // Update nodes
+            const nodeUpdate = svg.selectAll(".node")
+                .data(newTreeData.descendants());
+
+            // Update positions
+            nodeUpdate.attr("transform", (d) => `translate(${d.y},${d.x})`);
         });
-
-    svg.call(zoom);
-
-</script>
-
+    </script>
 </body>
 </html>
