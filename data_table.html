@@ -197,4 +197,109 @@
                 .attr("y", -5)
                 .style("text-anchor", "middle")
                 .style("font-size", "10px")
-                .text((d
+                .text((d) => d.data.jobTitle); }
+            function zoomed(event) {
+        svg.attr("transform", event.transform);
+    }
+
+    function collapse(d) {
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        }
+    }
+
+    function click(event, d) {
+        if (d.children) {
+            collapse(d);
+        } else {
+            d.children = d._children;
+        }
+        update(d);
+    }
+
+    document.getElementById("zoomSlider").addEventListener("input", function () {
+        const scale = this.value;
+        svg.attr("transform", `scale(${scale})`);
+    });
+
+    document.getElementById("collapseAllBtn").addEventListener("click", function () {
+        nodes.forEach(collapse);
+        update(root);
+    });
+
+    document.getElementById("expandAllBtn").addEventListener("click", function () {
+        nodes.forEach((d) => {
+            d.children = d._children;
+        });
+        update(root);
+    });
+
+    document.getElementById("expandNextLevelBtn").addEventListener("click", function () {
+        nodes.forEach((d) => {
+            if (d.depth === 1) {
+                d.children = d._children;
+            }
+        });
+        update(root);
+    });
+
+    document.getElementById("collapseNextLevelBtn").addEventListener("click", function () {
+        nodes.forEach((d) => {
+            if (d.depth === 1 && d.children) {
+                collapse(d);
+            }
+        });
+        update(root);
+    });
+
+    // Populate the data table
+    function populateDataTable() {
+        const tbody = document.getElementById('employeeDataTableBody');
+        tbody.innerHTML = ''; // Clear existing rows
+        employeeData.forEach(emp => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${emp.id}</td>
+                <td><input type="text" value="${emp.name}" data-id="${emp.id}" /></td>
+                <td>${emp.team}</td>
+                <td>${emp.jobTitle}</td>
+                <td><button onclick="editEmployee('${emp.id}')">Save</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Handle editing an employee
+    function editEmployee(id) {
+        const nameInput = document.querySelector(`input[data-id="${id}"]`);
+        const newName = nameInput.value;
+        const employee = employeeData.find(emp => emp.id === id);
+        if (employee) {
+            employee.name = newName; // Update name in data array
+            update(root); // Refresh org chart
+        }
+    }
+
+    // Handle switching to the data table view
+    document.getElementById('dataTableButton').addEventListener('click', function () {
+        document.getElementById('orgChart').style.display = 'none';
+        document.getElementById('dataTable').style.display = 'block';
+        populateDataTable(); // Populate the data table on switch
+    });
+
+    // Optional: You can add a button to go back to the org chart
+    const backToOrgChartButton = document.createElement('button');
+    backToOrgChartButton.innerText = 'Back to Org Chart';
+    backToOrgChartButton.style.position = 'absolute';
+    backToOrgChartButton.style.top = '10px';
+    backToOrgChartButton.style.left = '10px';
+    backToOrgChartButton.style.zIndex = '10';
+    document.body.appendChild(backToOrgChartButton);
+    backToOrgChartButton.addEventListener('click', function () {
+        document.getElementById('orgChart').style.display = 'block';
+        document.getElementById('dataTable').style.display = 'none';
+    });
+</script>
+</body>
+</html>
