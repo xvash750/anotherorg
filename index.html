@@ -236,23 +236,39 @@
                 d.children = null;
             }
         }
-        // Show edit form
-        function showEditForm(d) {
-            document.getElementById("editForm").style.display = "block";
-            document.getElementById("editId").value = d.data.id;
-            document.getElementById("editName").value = d.data.name;
-            document.getElementById("editTeam").value = d.data.team;
-            document.getElementById("editJobTitle").value = d.data.jobTitle;
-            document.getElementById("editManagerId").value = d.data.managerId;
+    // Select all nodes and bind click event
+node.on("click", function(event, d) {
+    if (event.shiftKey) {
+        // If Shift key is pressed, show the edit form
+        showEditForm(d);
+    }
+});
 
-            document.getElementById("saveBtn").onclick = function () {
-                saveEdit(d);
-            };
+// Function to show the edit form
+function showEditForm(d) {
+    // Assuming you have an edit form container with the id 'editForm'
+    const form = document.getElementById('editForm');
+    
+    // Display the form
+    form.style.display = 'block';
 
-            document.getElementById("cancelBtn").onclick = function () {
-                document.getElementById("editForm").style.display = "none";
-            };
-        }
+    // Populate form fields with the node's data
+    document.getElementById('editID').value = d.data.id;
+    document.getElementById('editName').value = d.data.name;
+    document.getElementById('editTeam').value = d.data.team;
+    document.getElementById('editJobTitle').value = d.data.jobTitle;
+    document.getElementById('editManagerID').value = d.data.managerID;
+}
+
+// Function to hide the edit form
+function hideEditForm() {
+    const form = document.getElementById('editForm');
+    form.style.display = 'none';
+}
+
+// Initially hide the form
+hideEditForm();
+
 
         // Save changes to the node data
         function saveEdit(d) {
