@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Data Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        /* Back Button */
+        #backBtn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: steelblue;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        #backBtn:hover {
+            background-color: #4682B4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Employee Data Table</h1>
+    <table id="employeeTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Manager ID</th>
+                <th>Team</th>
+                <th>Job Title</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be populated by JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Back Button -->
+    <button id="backBtn" onclick="window.location.href='index.html'">Back to Org Chart</button>
+
+    <script>
+        const employeeData = [
+            { id: '1', name: 'John Doe', managerId: null, team: 'Leadership', jobTitle: 'CEO' },
+            { id: '2', name: 'Jane Smith', managerId: '1', team: 'Leadership', jobTitle: 'CTO' },
+            { id: '3', name: 'James Brown', managerId: '1', team: 'Leadership', jobTitle: 'CFO' },
+            { id: '4', name: 'Emily Davis', managerId: '2', team: 'Engineering', jobTitle: 'Lead Engineer' },
+            { id: '5', name: 'Michael Johnson', managerId: '2', team: 'Engineering', jobTitle: 'Software Engineer' },
+            { id: '6', name: 'Jessica Williams', managerId: '3', team: 'Finance', jobTitle: 'Finance Manager' },
+            { id: '7', name: 'Daniel Wilson', managerId: '3', team: 'Finance', jobTitle: 'Accountant' },
+            { id: '8', name: 'Sophia Martinez', managerId: '4', team: 'Engineering', jobTitle: 'Product Manager' },
+            { id: '9', name: 'David Garcia', managerId: '5', team: 'Engineering', jobTitle: 'QA Engineer' },
+            { id: '10', name: 'Olivia Rodriguez', managerId: '6', team: 'Finance', jobTitle: 'Financial Analyst' },
+            { id: '11', name: 'William Lee', managerId: '6', team: 'Finance', jobTitle: 'Auditor' },
+            { id: '12', name: 'Emma Perez', managerId: '8', team: 'Engineering', jobTitle: 'UX Designer' },
+            { id: '13', name: 'Liam Taylor', managerId: '8', team: 'Engineering', jobTitle: 'Frontend Developer' },
+            { id: '14', name: 'Ava Thompson', managerId: '9', team: 'Engineering', jobTitle: 'Backend Developer' },
+            { id: '15', name: 'Mason White', managerId: '7', team: 'Finance', jobTitle: 'Tax Specialist' },
+            { id: '16', name: 'Isabella Harris', managerId: '1', team: 'Leadership', jobTitle: 'COO' },
+            { id: '17', name: 'Ethan Clark', managerId: '16', team: 'Operations', jobTitle: 'Operations Manager' },
+            { id: '18', name: 'Charlotte Lewis', managerId: '16', team: 'Operations', jobTitle: 'Logistics Coordinator' },
+            { id: '19', name: 'Oliver Robinson', managerId: '5', team: 'Engineering', jobTitle: 'DevOps Engineer' },
+            { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' }
+        ];
+
+        const tableBody = document.querySelector('#employeeTable tbody');
+
+        employeeData.forEach(employee => {
+            const row = document.createElement('tr');
+
+            const idCell = document.createElement('td');
+            idCell.textContent = employee.id;
+            row.appendChild(idCell);
+
+            const nameCell = document.createElement('td');
+            nameCell.textContent = employee.name;
+            row.appendChild(nameCell);
+
+            const managerIdCell = document.createElement('td');
+            managerIdCell.textContent = employee.managerId ? employee.managerId : 'N/A';
+            row.appendChild(managerIdCell);
+
+            const teamCell = document.createElement('td');
+            teamCell.textContent = employee.team;
+            row.appendChild(teamCell);
+
+            const jobTitleCell = document.createElement('td');
+            jobTitleCell.textContent = employee.jobTitle;
+            row.appendChild(jobTitleCell);
+
+            tableBody.appendChild(row);
+        });
+    </script>
+</body>
+</html>
