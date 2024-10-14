@@ -32,7 +32,7 @@
             stroke: #999;
             stroke-width: 2px;
         }
-        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandLevelDropdown {
+        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandNextLevelBtn, #collapseNextLevelBtn {
             position: absolute;
             top: 10px;
             z-index: 10;
@@ -46,25 +46,22 @@
         #expandAllBtn {
             left: 250px;
         }
-        #expandLevelDropdown {
+        #expandNextLevelBtn {
             left: 350px;
+        }
+        #collapseNextLevelBtn {
+            left: 450px;
         }
     </style>
 </head>
 <body>
     <!-- Zoom Slider -->
     <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.1" value="1" />
-    <!-- Collapse/Expand All Buttons -->
+    <!-- Collapse/Expand Buttons -->
     <button id="collapseAllBtn">Collapse All</button>
     <button id="expandAllBtn">Expand All</button>
-    <!-- Level Control Dropdown -->
-    <select id="expandLevelDropdown">
-        <option value="1">Expand to Level 1</option>
-        <option value="2" selected>Expand to Level 2</option>
-        <option value="3">Expand to Level 3</option>
-        <option value="4">Expand to Level 4</option>
-        <option value="5">Expand to Level 5</option>
-    </select>
+    <button id="expandNextLevelBtn">Expand to Next Level</button>
+    <button id="collapseNextLevelBtn">Collapse to Next Level</button>
 
     <script>
         const employeeData = [
@@ -104,8 +101,7 @@
             .parentId((d) => d.managerId)(employeeData);
 
         const treeLayout = d3.tree()
-            .nodeSize([120, 150])  // Reduce vertical/horizontal spacing for compact layout
-            .separation((a, b) => a.parent === b.parent ? 1 : 1.5);
+            .nodeSize([120, 150]);
 
         let treeData = treeLayout(root);
         let nodes = treeData.descendants();
@@ -127,12 +123,12 @@
 
             svg.selectAll("*").remove();
 
-            // Render links (force all lines to have uniform thickness)
+            // Render links
             const link = svg.selectAll(".link")
                 .data(links)
                 .enter().append("path")
                 .attr("class", "link")
-                .attr("d", d3.linkVertical()  // Changed to `linkVertical` for vertical layout
+                .attr("d", d3.linkVertical()
                     .x((d) => d.x)
                     .y((d) => d.y)
                 )
@@ -144,34 +140,30 @@
                 .attr("class", "node")
                 .attr("transform", (d) => `translate(${d.x},${d.y})`);
 
-            // Create a card (rectangle) for each node
             node.append("rect")
                 .attr("width", 120)
-                .attr("height", 60)  // Adjust card size for compact layout
-                .attr("x", -60) // Center the rectangle horizontally
-                .attr("y", -30) // Center the rectangle vertically
+                .attr("height", 60)
+                .attr("x", -60)
+                .attr("y", -30)
                 .style("fill", "#fff")
                 .on("click", click);
 
-            // Add employee name inside the card
             node.append("text")
                 .attr("dy", "-5px")
                 .attr("y", -10)
                 .style("text-anchor", "middle")
                 .text((d) => d.data.name);
 
-            // Add employee position inside the card
             node.append("text")
-                .attr("dy", "1.2em") // Adjust to place below the name
-                .attr("y", -5) // Offset vertically from the top of the card
+                .attr("dy", "1.2em")
+                .attr("y", -5)
                 .style("text-anchor", "middle")
                 .style("font-size", "10px")
                 .text((d) => d.data.team);
 
-            // Add employee position inside the card
             node.append("text")
-                .attr("dy", "1.2em") // Adjust to place below the name
-                .attr("y", 10) // Offset vertically from the top of the card
+                .attr("dy", "1.2em")
+                .attr("y", 10)
                 .style("text-anchor", "middle")
                 .style("font-size", "10px")
                 .text((d) => d.data.jobTitle);
@@ -182,43 +174,26 @@
             svg.attr("transform", event.transform);
         }
 
-        // Toggle children on click
-function click(event, d) {
-    d.children ? collapse(d) : expand(d);
-    update(d);
-}
+        function click(event, d) {
+            d.children ? collapse(d) : expand(d);
+            update(d);
+        }
 
-function expand(d) {
-    if (d._children) {
-        d.children = d._children;
-        d._children = null;
-    }
-}
-
-function collapse(d) {
-    if (d.children) {
-        d._children = d.children;
-        d.children = null;
-    }
-}
-
-
-        function editNode(node) {
-            const newName = prompt("Edit Name:", node.data.name);
-            const newTeam = prompt("Edit Team:", node.data.team);
-            const newJobTitle = prompt("Edit Job Title:", node.data.jobTitle);
-
-            if (newName !== null) {
-                node.data.name = newName;
+        function expand(d) {
+            if (d._children) {
+                d.children = d._children;
+                d._children = null;
             }
-            if (newTeam !== null) {
-                node.data.team = newTeam;
+            if (d.children) {
+                d.children.forEach(expand); // Expand all descendants
             }
-            if (newJobTitle !== null) {
-                node.data.jobTitle = newJobTitle;
-            }
+        }
 
-            update(node);
+        function collapse(d) {
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            }
         }
 
         // Expand/collapse all nodes
@@ -228,27 +203,30 @@ function collapse(d) {
         });
 
         document.getElementById("expandAllBtn").addEventListener("click", function () {
-            nodes.forEach(expand);
+            nodes.forEach(expand); // Expand all nodes
             update(root);
         });
 
-        // Zoom control
-        const zoomSlider = document.getElementById("zoomSlider");
-        zoomSlider.addEventListener("input", function () {
-            svg.attr("transform", d3.zoomIdentity.scale(+this.value));
-        });
-
-        // Expand to specific levels
-        document.getElementById("expandLevelDropdown").addEventListener("change", function () {
-            const level = +this.value;
-            nodes.forEach(d => {
-                if (d.depth > level) {
-                    collapse(d);
-                } else {
-                    expand(d);
-                }
+        // Expand to next level only
+        document.getElementById("expandNextLevelBtn").addEventListener("click", function () {
+            nodes.forEach(function (d) {
+                if (d.depth === 1) expand(d);
             });
             update(root);
+        });
+
+        // Collapse to next level only
+        document.getElementById("collapseNextLevelBtn").addEventListener("click", function () {
+            nodes.forEach(function (d) {
+                if (d.depth > 1) collapse(d);
+            });
+            update(root);
+        });
+
+        // Zoom slider functionality
+        document.getElementById("zoomSlider").addEventListener("input", function () {
+            const scale = d3.select("svg").transition().duration(500)
+                .attr("transform", `scale(${this.value})`);
         });
     </script>
 </body>
