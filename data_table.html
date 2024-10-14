@@ -3,61 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Data Table</title>
+    <title>Compact Columnar Org Chart with Cards</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
-        h1 {
-            text-align: center;
+        svg {
+            background-color: #f4f4f4;
+        }
+        .node rect {
+            cursor: pointer;
+            fill: #fff;
+            stroke: steelblue;
+            stroke-width: 2px;
+            rx: 10; /* Rounded corners */
+            ry: 10;
+        }
+        .node text {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            fill: #333;
+        }
+        .link {
+            fill: none;
+            stroke: #999;
+            stroke-width: 2px;
+        }
+        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandNextLevelBtn, #collapseNextLevelBtn {
+            position: absolute;
+            top: 10px;
+            z-index: 10;
+        }
+        #zoomSlider {
+            left: 10px;
+        }
+        #collapseAllBtn {
+            left: 150px;
+        }
+        #expandAllBtn {
+            left: 250px;
+        }
+        #expandNextLevelBtn {
+            left: 350px;
+        }
+        #collapseNextLevelBtn {
+            left: 550px;
+        }
+        #dataTableButton {
+            position: absolute;
+            top: 75px;
+            left: 10px;
+            z-index: 10;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 100px; /* Ensure it doesn't overlap with buttons */
         }
         th, td {
-            border: 1px solid #999;
-            padding: 8px 12px;
+            border: 1px solid #ddd;
+            padding: 8px;
             text-align: left;
         }
         th {
             background-color: #f2f2f2;
         }
-        /* Back Button */
-        #backBtn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: steelblue;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-        #backBtn:hover {
-            background-color: #4682B4;
-        }
     </style>
 </head>
 <body>
-    <h1>Employee Data Table</h1>
-    <table id="employeeTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Manager ID</th>
-                <th>Team</th>
-                <th>Job Title</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Rows will be populated by JavaScript -->
-        </tbody>
-    </table>
+    <!-- Navigation Button -->
+    <button id="dataTableButton">Data Table</button>
 
-    <!-- Back Button -->
-    <button id="backBtn" onclick="window.location.href='index.html'">Back to Org Chart</button>
+    <!-- Zoom Slider -->
+    <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.1" value="1" />
+    <!-- Collapse/Expand Buttons -->
+    <button id="collapseAllBtn">Collapse All</button>
+    <button id="expandAllBtn">Expand All</button>
+    <button id="expandNextLevelBtn">Expand to Next Level</button>
+    <button id="collapseNextLevelBtn">Collapse to Next Level</button>
+
+    <div id="orgChart"></div>
+    <div id="dataTable" style="display: none;">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Team</th>
+                    <th>Job Title</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody id="employeeDataTableBody"></tbody>
+        </table>
+    </div>
 
     <script>
         const employeeData = [
@@ -83,33 +125,76 @@
             { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' }
         ];
 
-        const tableBody = document.querySelector('#employeeTable tbody');
+        const width = window.innerWidth;
+        const height = window.innerHeight;
 
-        employeeData.forEach(employee => {
-            const row = document.createElement('tr');
+        const svg = d3.select("#orgChart").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .call(d3.zoom().on("zoom", zoomed)) // Add zoom behavior
+            .append("g"); // Group to apply zoom transformations
 
-            const idCell = document.createElement('td');
-            idCell.textContent = employee.id;
-            row.appendChild(idCell);
+        const root = d3.stratify()
+            .id((d) => d.id)
+            .parentId((d) => d.managerId)(employeeData);
 
-            const nameCell = document.createElement('td');
-            nameCell.textContent = employee.name;
-            row.appendChild(nameCell);
+        const treeLayout = d3.tree()
+            .nodeSize([120, 150]);
 
-            const managerIdCell = document.createElement('td');
-            managerIdCell.textContent = employee.managerId ? employee.managerId : 'N/A';
-            row.appendChild(managerIdCell);
+        let treeData = treeLayout(root);
+        let nodes = treeData.descendants();
+        let links = treeData.links();
 
-            const teamCell = document.createElement('td');
-            teamCell.textContent = employee.team;
-            row.appendChild(teamCell);
-
-            const jobTitleCell = document.createElement('td');
-            jobTitleCell.textContent = employee.jobTitle;
-            row.appendChild(jobTitleCell);
-
-            tableBody.appendChild(row);
+        // Collapse nodes at first render
+        nodes.forEach((d) => {
+            if (d.depth === 1) {
+                collapse(d);
+            }
         });
-    </script>
-</body>
-</html>
+
+        update(root);
+
+        function update(source) {
+            treeData = treeLayout(root);
+            nodes = treeData.descendants();
+            links = treeData.links();
+
+            svg.selectAll("*").remove();
+
+            // Render links
+            const link = svg.selectAll(".link")
+                .data(links)
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("d", d3.linkVertical()
+                    .x((d) => d.x)
+                    .y((d) => d.y)
+                )
+                .attr("stroke-width", "2px");
+
+            const node = svg.selectAll(".node")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .attr("transform", (d) => `translate(${d.x},${d.y})`);
+
+            node.append("rect")
+                .attr("width", 120)
+                .attr("height", 60)
+                .attr("x", -60)
+                .attr("y", -30)
+                .style("fill", "#fff")
+                .on("click", click);
+
+            node.append("text")
+                .attr("dy", "-5px")
+                .attr("y", -10)
+                .style("text-anchor", "middle")
+                .text((d) => d.data.name);
+
+            node.append("text")
+                .attr("dy", "1.2em")
+                .attr("y", -5)
+                .style("text-anchor", "middle")
+                .style("font-size", "10px")
+                .text((d
