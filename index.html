@@ -218,15 +218,15 @@
         // Collapse to next level only
         document.getElementById("collapseNextLevelBtn").addEventListener("click", function () {
             nodes.forEach(function (d) {
-                if (d.depth > 1) collapse(d);
+                if (d.depth === 1) collapse(d);
             });
             update(root);
         });
 
-        // Zoom slider functionality
+        // Zoom slider
         document.getElementById("zoomSlider").addEventListener("input", function () {
-            const scale = d3.select("svg").transition().duration(500)
-                .attr("transform", `scale(${this.value})`);
+            const scale = this.value;
+            svg.attr("transform", `scale(${scale})`);
         });
     </script>
 </body>
