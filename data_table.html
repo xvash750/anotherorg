@@ -3,103 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compact Columnar Org Chart with Cards</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>Employee Data Table</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        svg {
-            background-color: #f4f4f4;
-        }
-        .node rect {
-            cursor: pointer;
-            fill: #fff;
-            stroke: steelblue;
-            stroke-width: 2px;
-            rx: 10; /* Rounded corners */
-            ry: 10;
-        }
-        .node text {
             font-family: Arial, sans-serif;
-            font-size: 12px;
-            fill: #333;
+            margin: 20px;
         }
-        .link {
-            fill: none;
-            stroke: #999;
-            stroke-width: 2px;
-        }
-        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandNextLevelBtn, #collapseNextLevelBtn {
-            position: absolute;
-            top: 10px;
-            z-index: 10;
-        }
-        #zoomSlider {
-            left: 10px;
-        }
-        #collapseAllBtn {
-            left: 150px;
-        }
-        #expandAllBtn {
-            left: 250px;
-        }
-        #expandNextLevelBtn {
-            left: 350px;
-        }
-        #collapseNextLevelBtn {
-            left: 550px;
-        }
-        #dataTableButton {
-            position: absolute;
-            top: 75px;
-            left: 10px;
-            z-index: 10;
+        h1 {
+            text-align: center;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 100px; /* Ensure it doesn't overlap with buttons */
+            margin-top: 20px;
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border: 1px solid #999;
+            padding: 8px 12px;
             text-align: left;
         }
         th {
             background-color: #f2f2f2;
         }
+        /* Back Button */
+        #backBtn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: steelblue;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        #backBtn:hover {
+            background-color: #4682B4;
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation Button -->
-    <button id="dataTableButton">Data Table</button>
+    <h1>Employee Data Table</h1>
+    <table id="employeeTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Manager ID</th>
+                <th>Team</th>
+                <th>Job Title</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be populated by JavaScript -->
+        </tbody>
+    </table>
 
-    <!-- Zoom Slider -->
-    <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.1" value="1" />
-    <!-- Collapse/Expand Buttons -->
-    <button id="collapseAllBtn">Collapse All</button>
-    <button id="expandAllBtn">Expand All</button>
-    <button id="expandNextLevelBtn">Expand to Next Level</button>
-    <button id="collapseNextLevelBtn">Collapse to Next Level</button>
-
-    <div id="orgChart"></div>
-    <div id="dataTable" style="display: none;">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Team</th>
-                    <th>Job Title</th>
-                    <th>Edit</th>
-                </tr>
-            </thead>
-            <tbody id="employeeDataTableBody"></tbody>
-        </table>
-    </div>
+    <!-- Back Button -->
+    <button id="backBtn" onclick="window.location.href='index.html'">Back to Org Chart</button>
 
     <script>
         const employeeData = [
@@ -125,186 +83,33 @@
             { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' }
         ];
 
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+        const tableBody = document.querySelector('#employeeTable tbody');
 
-        const svg = d3.select("#orgChart").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .call(d3.zoom().on("zoom", zoomed)) // Add zoom behavior
-            .append("g"); // Group to apply zoom transformations
+        employeeData.forEach(employee => {
+            const row = document.createElement('tr');
 
-        const root = d3.stratify()
-            .id((d) => d.id)
-            .parentId((d) => d.managerId)(employeeData);
+            const idCell = document.createElement('td');
+            idCell.textContent = employee.id;
+            row.appendChild(idCell);
 
-        const treeLayout = d3.tree()
-            .nodeSize([120, 150]);
+            const nameCell = document.createElement('td');
+            nameCell.textContent = employee.name;
+            row.appendChild(nameCell);
 
-        let treeData = treeLayout(root);
-        let nodes = treeData.descendants();
-        let links = treeData.links();
+            const managerIdCell = document.createElement('td');
+            managerIdCell.textContent = employee.managerId ? employee.managerId : 'N/A';
+            row.appendChild(managerIdCell);
 
-        // Collapse nodes at first render
-        nodes.forEach((d) => {
-            if (d.depth === 1) {
-                collapse(d);
-            }
+            const teamCell = document.createElement('td');
+            teamCell.textContent = employee.team;
+            row.appendChild(teamCell);
+
+            const jobTitleCell = document.createElement('td');
+            jobTitleCell.textContent = employee.jobTitle;
+            row.appendChild(jobTitleCell);
+
+            tableBody.appendChild(row);
         });
-
-        update(root);
-
-        function update(source) {
-            treeData = treeLayout(root);
-            nodes = treeData.descendants();
-            links = treeData.links();
-
-            svg.selectAll("*").remove();
-
-            // Render links
-            const link = svg.selectAll(".link")
-                .data(links)
-                .enter().append("path")
-                .attr("class", "link")
-                .attr("d", d3.linkVertical()
-                    .x((d) => d.x)
-                    .y((d) => d.y)
-                )
-                .attr("stroke-width", "2px");
-
-            const node = svg.selectAll(".node")
-                .data(nodes)
-                .enter().append("g")
-                .attr("class", "node")
-                .attr("transform", (d) => `translate(${d.x},${d.y})`);
-
-            node.append("rect")
-                .attr("width", 120)
-                .attr("height", 60)
-                .attr("x", -60)
-                .attr("y", -30)
-                .style("fill", "#fff")
-                .on("click", click);
-
-            node.append("text")
-                .attr("dy", "-5px")
-                .attr("y", -10)
-                .style("text-anchor", "middle")
-                .text((d) => d.data.name);
-
-            node.append("text")
-                .attr("dy", "1.2em")
-                .attr("y", -5)
-                .style("text-anchor", "middle")
-                .style("font-size", "10px")
-                .text((d) => d.data.jobTitle); }
-            function zoomed(event) {
-        svg.attr("transform", event.transform);
-    }
-
-    function collapse(d) {
-        if (d.children) {
-            d._children = d.children;
-            d.children = null;
-        }
-    }
-
-    function click(event, d) {
-        if (d.children) {
-            collapse(d);
-        } else {
-            d.children = d._children;
-        }
-        update(d);
-    }
-
-    document.getElementById("zoomSlider").addEventListener("input", function () {
-        const scale = this.value;
-        svg.attr("transform", `scale(${scale})`);
-    });
-
-    document.getElementById("collapseAllBtn").addEventListener("click", function () {
-        nodes.forEach(collapse);
-        update(root);
-    });
-
-    document.getElementById("expandAllBtn").addEventListener("click", function () {
-        nodes.forEach((d) => {
-            d.children = d._children;
-        });
-        update(root);
-    });
-
-    document.getElementById("expandNextLevelBtn").addEventListener("click", function () {
-        nodes.forEach((d) => {
-            if (d.depth === 1) {
-                d.children = d._children;
-            }
-        });
-        update(root);
-    });
-
-    document.getElementById("collapseNextLevelBtn").addEventListener("click", function () {
-        nodes.forEach((d) => {
-            if (d.depth === 1 && d.children) {
-                collapse(d);
-            }
-        });
-        update(root);
-    });
-
-    // Populate the data table
-    function populateDataTable() {
-        const tbody = document.getElementById('employeeDataTableBody');
-        tbody.innerHTML = ''; // Clear existing rows
-        employeeData.forEach(emp => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${emp.id}</td>
-                <td><input type="text" value="${emp.name}" data-id="${emp.id}" /></td>
-                <td>${emp.team}</td>
-                <td>${emp.jobTitle}</td>
-                <td><button onclick="editEmployee('${emp.id}')">Save</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    // Handle editing an employee
-    function editEmployee(id) {
-    const nameInput = document.querySelector(`input[data-id="${id}"].name`); // Input for name
-    const teamInput = document.querySelector(`input[data-id="${id}"].team`); // Input for team
-    const newName = nameInput.value;
-    const newTeam = teamInput.value; // Get new team value
-
-    const employee = employeeData.find(emp => emp.id === id);
-    if (employee) {
-        employee.name = newName; // Update name in data array
-        employee.team = newTeam; // Update team in data array
-        update(root); // Refresh org chart
-    }
-}
-
-
-    // Handle switching to the data table view
-    document.getElementById('dataTableButton').addEventListener('click', function () {
-        document.getElementById('orgChart').style.display = 'none';
-        document.getElementById('dataTable').style.display = 'block';
-        populateDataTable(); // Populate the data table on switch
-    });
-
-    // Optional: You can add a button to go back to the org chart
-    const backToOrgChartButton = document.createElement('button');
-    backToOrgChartButton.innerText = 'Back to Org Chart';
-    backToOrgChartButton.style.position = 'absolute';
-    backToOrgChartButton.style.top = '20px';
-    backToOrgChartButton.style.left = '10px';
-    backToOrgChartButton.style.zIndex = '10';
-    document.body.appendChild(backToOrgChartButton);
-    backToOrgChartButton.addEventListener('click', function () {
-        document.getElementById('orgChart').style.display = 'block';
-        document.getElementById('dataTable').style.display = 'none';
-    });
-</script>
+    </script>
 </body>
 </html>
