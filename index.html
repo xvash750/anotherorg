@@ -183,32 +183,25 @@
         }
 
         // Toggle children on click
-        function click(event, d) {
-            if (event.shiftKey) { // Check if Ctrl key is pressed
-                editNode(d);
-            } else {
-                if (d.children) {
-                    d.children.forEach(collapse);
-                } else {
-                    d.children = d._children;
-                }
-                update(d);
-            }
-        }
+function click(event, d) {
+    d.children ? collapse(d) : expand(d);
+    update(d);
+}
 
-        function collapse(d) {
-            if (d.children) {
-                d._children = d.children;
-                d.children = null;
-            }
-        }
+function expand(d) {
+    if (d._children) {
+        d.children = d._children;
+        d._children = null;
+    }
+}
 
-        function expand(d) {
-            if (d._children) {
-                d.children = d._children;
-                d._children = null;
-            }
-        }
+function collapse(d) {
+    if (d.children) {
+        d._children = d.children;
+        d.children = null;
+    }
+}
+
 
         function editNode(node) {
             const newName = prompt("Edit Name:", node.data.name);
