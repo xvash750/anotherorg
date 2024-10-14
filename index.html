@@ -71,30 +71,28 @@
     <button id="dataTableBtn" onclick="window.location.href='data_table.html'">Data Table</button>
 
     <script>
-        const employeeData = [
-    { id: '1', name: 'John Doe', managerId: null, team: 'Leadership', jobTitle: 'CEO' },
-    { id: '2', name: 'Jane Smith', managerId: '1', team: 'Leadership', jobTitle: 'CTO' },
-    { id: '3', name: 'James Brown', managerId: '1', team: 'Leadership', jobTitle: 'CFO' },
-    { id: '4', name: 'Emily Davis', managerId: '2', team: 'Engineering', jobTitle: 'Lead Engineer' },
-    { id: '5', name: 'Michael Johnson', managerId: '2', team: 'Engineering', jobTitle: 'Software Engineer' },
-    { id: '6', name: 'Jessica Williams', managerId: '3', team: 'Finance', jobTitle: 'Finance Manager' },
-    { id: '7', name: 'Daniel Wilson', managerId: '3', team: 'Finance', jobTitle: 'Accountant' },
-    { id: '8', name: 'Sophia Martinez', managerId: '4', team: 'Engineering', jobTitle: 'Product Manager' },
-    { id: '9', name: 'David Garcia', managerId: '5', team: 'Engineering', jobTitle: 'QA Engineer' },
-    { id: '10', name: 'Olivia Rodriguez', managerId: '6', team: 'Finance', jobTitle: 'Financial Analyst' },
-    { id: '11', name: 'William Lee', managerId: '6', team: 'Finance', jobTitle: 'Auditor' },
-    { id: '12', name: 'Emma Perez', managerId: '8', team: 'Engineering', jobTitle: 'UX Designer' },
-    { id: '13', name: 'Liam Taylor', managerId: '8', team: 'Engineering', jobTitle: 'Frontend Developer' },
-    { id: '14', name: 'Ava Thompson', managerId: '9', team: 'Engineering', jobTitle: 'Backend Developer' },
-    { id: '15', name: 'Mason White', managerId: '7', team: 'Finance', jobTitle: 'Tax Specialist' },
-    { id: '16', name: 'Isabella Harris', managerId: '1', team: 'Leadership', jobTitle: 'COO' },
-    { id: '17', name: 'Ethan Clark', managerId: '16', team: 'Operations', jobTitle: 'Operations Manager' },
-    { id: '18', name: 'Charlotte Lewis', managerId: '16', team: 'Operations', jobTitle: 'Logistics Coordinator' },
-    { id: '19', name: 'Oliver Robinson', managerId: '5', team: 'Engineering', jobTitle: 'DevOps Engineer' },
-    { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' },
-
-    // Additional rows
-    { id: '21', name: 'Noah King', managerId: '2', team: 'Engineering', jobTitle: 'Systems Architect' },
+       const employeeData = [
+            { id: '1', name: 'John Doe', managerId: null, team: 'Leadership', jobTitle: 'CEO' },
+            { id: '2', name: 'Jane Smith', managerId: '1', team: 'Leadership', jobTitle: 'CTO' },
+            { id: '3', name: 'James Brown', managerId: '1', team: 'Leadership', jobTitle: 'CFO' },
+            { id: '4', name: 'Emily Davis', managerId: '2', team: 'Engineering', jobTitle: 'Lead Engineer' },
+            { id: '5', name: 'Michael Johnson', managerId: '2', team: 'Engineering', jobTitle: 'Software Engineer' },
+            { id: '6', name: 'Jessica Williams', managerId: '3', team: 'Finance', jobTitle: 'Finance Manager' },
+            { id: '7', name: 'Daniel Wilson', managerId: '3', team: 'Finance', jobTitle: 'Accountant' },
+            { id: '8', name: 'Sophia Martinez', managerId: '4', team: 'Engineering', jobTitle: 'Product Manager' },
+            { id: '9', name: 'David Garcia', managerId: '5', team: 'Engineering', jobTitle: 'QA Engineer' },
+            { id: '10', name: 'Olivia Rodriguez', managerId: '6', team: 'Finance', jobTitle: 'Financial Analyst' },
+            { id: '11', name: 'William Lee', managerId: '6', team: 'Finance', jobTitle: 'Auditor' },
+            { id: '12', name: 'Emma Perez', managerId: '8', team: 'Engineering', jobTitle: 'UX Designer' },
+            { id: '13', name: 'Liam Taylor', managerId: '8', team: 'Engineering', jobTitle: 'Frontend Developer' },
+            { id: '14', name: 'Ava Thompson', managerId: '9', team: 'Engineering', jobTitle: 'Backend Developer' },
+            { id: '15', name: 'Mason White', managerId: '7', team: 'Finance', jobTitle: 'Tax Specialist' },
+            { id: '16', name: 'Isabella Harris', managerId: '1', team: 'Leadership', jobTitle: 'COO' },
+            { id: '17', name: 'Ethan Clark', managerId: '16', team: 'Operations', jobTitle: 'Operations Manager' },
+            { id: '18', name: 'Charlotte Lewis', managerId: '16', team: 'Operations', jobTitle: 'Logistics Coordinator' },
+            { id: '19', name: 'Oliver Robinson', managerId: '5', team: 'Engineering', jobTitle: 'DevOps Engineer' },
+            { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' },
+           { id: '21', name: 'Noah King', managerId: null, team: 'Engineering', jobTitle: 'Systems Architect' },
     { id: '22', name: 'Lily Wright', managerId: '3', team: 'Finance', jobTitle: 'Financial Consultant' },
     { id: '23', name: 'Lucas Hall', managerId: '4', team: 'Engineering', jobTitle: 'Senior Developer' },
     { id: '24', name: 'Zoe Allen', managerId: '5', team: 'Engineering', jobTitle: 'Scrum Master' },
@@ -103,104 +101,8 @@
     { id: '27', name: 'Chloe Hill', managerId: '8', team: 'Engineering', jobTitle: 'Data Engineer' },
     { id: '28', name: 'Elijah Scott', managerId: '9', team: 'Engineering', jobTitle: 'Security Analyst' },
     { id: '29', name: 'Mia Green', managerId: '1', team: 'Leadership', jobTitle: 'HR Director' },
-    { id: '30', name: 'Alexander Adams', managerId: '29', team: 'HR', jobTitle: 'Recruiter' },
-
-    // Managers without line reports
-    { id: '31', name: 'Grace Baker', managerId: null, team: 'Marketing', jobTitle: 'CMO' },
-    { id: '32', name: 'Henry Nelson', managerId: null, team: 'Sales', jobTitle: 'VP of Sales' },
-    { id: '33', name: 'Ella Carter', managerId: null, team: 'Support', jobTitle: 'Support Manager' },
-    { id: '34', name: 'Logan Mitchell', managerId: null, team: 'IT', jobTitle: 'IT Director' },
-    { id: '35', name: 'Sofia Roberts', managerId: null, team: 'Research', jobTitle: 'Lead Researcher' },
-
-    // Continuing with reports
-    { id: '36', name: 'James Lee', managerId: '32', team: 'Sales', jobTitle: 'Sales Executive' },
-    { id: '37', name: 'Mia Turner', managerId: '32', team: 'Sales', jobTitle: 'Sales Associate' },
-    { id: '38', name: 'Evelyn Phillips', managerId: '33', team: 'Support', jobTitle: 'Customer Service Rep' },
-    { id: '39', name: 'Jackson Johnson', managerId: '33', team: 'Support', jobTitle: 'Technical Support' },
-    { id: '40', name: 'Scarlett Parker', managerId: '34', team: 'IT', jobTitle: 'Network Administrator' },
-
-    // More entries
-    { id: '41', name: 'Liam Thomas', managerId: '34', team: 'IT', jobTitle: 'Help Desk Technician' },
-    { id: '42', name: 'Ava Ramirez', managerId: '35', team: 'Research', jobTitle: 'Research Analyst' },
-    { id: '43', name: 'Noah Martinez', managerId: '35', team: 'Research', jobTitle: 'Data Scientist' },
-    { id: '44', name: 'Sophia Lee', managerId: '29', team: 'HR', jobTitle: 'HR Assistant' },
-    { id: '45', name: 'Ethan Wilson', managerId: '29', team: 'HR', jobTitle: 'Training Coordinator' },
-    { id: '46', name: 'Olivia Thompson', managerId: '31', team: 'Marketing', jobTitle: 'Marketing Coordinator' },
-    { id: '47', name: 'Mason Anderson', managerId: '31', team: 'Marketing', jobTitle: 'Content Strategist' },
-    { id: '48', name: 'Lily Campbell', managerId: '36', team: 'Sales', jobTitle: 'Sales Analyst' },
-    { id: '49', name: 'Isabella Roberts', managerId: '38', team: 'Support', jobTitle: 'Customer Success Manager' },
-    { id: '50', name: 'Liam Lee', managerId: '34', team: 'IT', jobTitle: 'System Analyst' },
-
-    // Additional managers without direct reports
-    { id: '51', name: 'Jack Walker', managerId: null, team: 'Development', jobTitle: 'Dev Team Lead' },
-    { id: '52', name: 'Grace Harris', managerId: null, team: 'Sales', jobTitle: 'Sales Director' },
-    { id: '53', name: 'Mason Carter', managerId: null, team: 'Legal', jobTitle: 'Legal Counsel' },
-    { id: '54', name: 'Ava Lee', managerId: null, team: 'Compliance', jobTitle: 'Compliance Officer' },
-    { id: '55', name: 'Lucas Perez', managerId: null, team: 'Quality Assurance', jobTitle: 'QA Director' },
-
-    // Continuing with reports
-    { id: '56', name: 'Sophia Ramirez', managerId: '51', team: 'Development', jobTitle: 'Software Developer' },
-    { id: '57', name: 'Liam Nelson', managerId: '52', team: 'Sales', jobTitle: 'Sales Representative' },
-    { id: '58', name: 'Emma Johnson', managerId: '53', team: 'Legal', jobTitle: 'Paralegal' },
-    { id: '59', name: 'Oliver Martinez', managerId: '54', team: 'Compliance', jobTitle: 'Regulatory Affairs Specialist' },
-    { id: '60', name: 'Evelyn Brown', managerId: '55', team: 'Quality Assurance', jobTitle: 'QA Engineer' },
-
-    // More entries
-    { id: '61', name: 'Aiden Thomas', managerId: '55', team: 'Quality Assurance', jobTitle: 'Quality Control Specialist' },
-    { id: '62', name: 'Chloe White', managerId: '51', team: 'Development', jobTitle: 'Backend Developer' },
-    { id: '63', name: 'Sophia King', managerId: '51', team: 'Development', jobTitle: 'Frontend Developer' },
-    { id: '64', name: 'Isabella Jackson', managerId: '52', team: 'Sales', jobTitle: 'Key Account Manager' },
-    { id: '65', name: 'Zoe Martinez', managerId: '53', team: 'Legal', jobTitle: 'Legal Assistant' },
-
-    // Additional managers without direct reports
-    { id: '66', name: 'James Clark', managerId: null, team: 'Training', jobTitle: 'Training Manager' },
-    { id: '67', name: 'Emma Wright', managerId: null, team: 'Public Relations', jobTitle: 'PR Director' },
-    { id: '68', name: 'Mason Hall', managerId: null, team: 'Product Management', jobTitle: 'Product Manager' },
-    { id: '69', name: 'Charlotte Allen', managerId: null, team: 'Business Development', jobTitle: 'Business Development Manager' },
-    { id: '70', name: 'Noah Young', managerId: null, team: 'Research', jobTitle: 'Research Director' },
-
-    // Continuing with reports
-    { id: '71', name: 'Lily Carter', managerId: '66', team: 'Training', jobTitle: 'Training Coordinator' },
-    { id: '72', name: 'Lucas Thomas', managerId: '67', team: 'Public Relations', jobTitle: 'Communications Specialist' },
-    { id: '73', name: 'Mia Jackson', managerId: '68', team: 'Product Management', jobTitle: 'Product Analyst' },
-    { id: '74', name: 'Ethan White', managerId: '69', team: 'Business Development', jobTitle: 'Sales Executive' },
-    { id: '75', name: 'Sofia Roberts', managerId: '70', team: 'Research', jobTitle: 'Research Analyst' },
-
-    // Final batch of entries
-    { id: '76', name: 'Jackson Lee', managerId: '70', team: 'Research', jobTitle: 'Data Scientist' },
-    { id: '77', name: 'Grace Taylor', managerId: '66', team: 'Training', jobTitle: 'Instructor' },
-    { id: '78', name: 'Aiden Brown', managerId: '67', team: 'Public Relations', jobTitle: 'Media Relations Specialist' },
-    { id: '79', name: 'Zoe Smith', managerId: '68', team: 'Product Management', jobTitle: 'Product Marketing Specialist' },
-    { id: '80', name: 'Liam Johnson', managerId: '69', team: 'Business Development', jobTitle: 'Business Analyst' },
-    
-    // Additional entries with no managerId
-    { id: '81', name: 'Sophia Green', managerId: null, team: 'Analytics', jobTitle: 'Analytics Manager' },
-    { id: '82', name: 'Ava Wilson', managerId: null, team: 'Corporate Strategy', jobTitle: 'Strategist' },
-    { id: '83', name: 'James Martinez', managerId: null, team: 'Corporate Affairs', jobTitle: 'Corporate Affairs Director' },
-    { id: '84', name: 'Isabella Davis', managerId: null, team: 'Public Policy', jobTitle: 'Policy Director' },
-    { id: '85', name: 'Noah Anderson', managerId: null, team: 'Corporate Communications', jobTitle: 'Communications Manager' },
-
-    // Completing the dataset
-    { id: '86', name: 'Emma Thompson', managerId: '81', team: 'Analytics', jobTitle: 'Data Analyst' },
-    { id: '87', name: 'Oliver Hernandez', managerId: '82', team: 'Corporate Strategy', jobTitle: 'Strategic Planner' },
-    { id: '88', name: 'Mason White', managerId: '83', team: 'Corporate Affairs', jobTitle: 'Corporate Affairs Specialist' },
-    { id: '89', name: 'Liam Robinson', managerId: '84', team: 'Public Policy', jobTitle: 'Policy Analyst' },
-    { id: '90', name: 'Chloe Garcia', managerId: '85', team: 'Corporate Communications', jobTitle: 'Content Manager' },
-
-    // Final entries with managerId
-    { id: '91', name: 'David Clark', managerId: '81', team: 'Analytics', jobTitle: 'Analytics Specialist' },
-    { id: '92', name: 'Sophia Lewis', managerId: '82', team: 'Corporate Strategy', jobTitle: 'Business Strategist' },
-    { id: '93', name: 'Emily Wilson', managerId: '83', team: 'Corporate Affairs', jobTitle: 'Public Affairs Manager' },
-    { id: '94', name: 'Isabella Harris', managerId: '84', team: 'Public Policy', jobTitle: 'Advocacy Specialist' },
-    { id: '95', name: 'Ethan Jackson', managerId: '85', team: 'Corporate Communications', jobTitle: 'Public Relations Officer' },
-
-    // Add 5 more to round it off
-    { id: '96', name: 'Jackson Young', managerId: null, team: 'Operations', jobTitle: 'Operations Analyst' },
-    { id: '97', name: 'Lily Allen', managerId: null, team: 'Supply Chain', jobTitle: 'Supply Chain Manager' },
-    { id: '98', name: 'Noah Baker', managerId: null, team: 'Facilities', jobTitle: 'Facilities Manager' },
-    { id: '99', name: 'Grace Scott', managerId: null, team: 'Events', jobTitle: 'Events Coordinator' },
-    { id: '100', name: 'James Harris', managerId: null, team: 'Compliance', jobTitle: 'Compliance Manager' }
-];
+    { id: '30', name: 'Alexander Adams', managerId: '29', team: 'HR', jobTitle: 'Recruiter' }
+        ];
 
         const width = window.innerWidth;
         const height = window.innerHeight;
