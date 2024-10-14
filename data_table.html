@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compact Columnar Org Chart with Cards</title>
+    <title>Org Chart with Editable Data Table</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -71,15 +71,21 @@
         th {
             background-color: #f2f2f2;
         }
+        .edit-btn {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .edit-btn:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation Button -->
     <button id="dataTableButton">Data Table</button>
-
-    <!-- Zoom Slider -->
     <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.1" value="1" />
-    <!-- Collapse/Expand Buttons -->
     <button id="collapseAllBtn">Collapse All</button>
     <button id="expandAllBtn">Expand All</button>
     <button id="expandNextLevelBtn">Expand to Next Level</button>
@@ -94,6 +100,7 @@
                     <th>Name</th>
                     <th>Team</th>
                     <th>Job Title</th>
+                    <th>Manager ID</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -125,6 +132,50 @@
             { id: '20', name: 'Sophia Walker', managerId: '4', team: 'Engineering', jobTitle: 'Data Scientist' }
         ];
 
+        // Function to show the Data Table
+        function showDataTable() {
+            const tableBody = document.getElementById('employeeDataTableBody');
+            tableBody.innerHTML = ''; // Clear existing data
+
+            employeeData.forEach((employee) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${employee.id}</td>
+                    <td><input type="text" value="${employee.name}" data-field="name" data-id="${employee.id}" /></td>
+                    <td><input type="text" value="${employee.team}" data-field="team" data-id="${employee.id}" /></td>
+                    <td><input type="text" value="${employee.jobTitle}" data-field="jobTitle" data-id="${employee.id}" /></td>
+                    <td><input type="text" value="${employee.managerId}" data-field="managerId" data-id="${employee.id}" /></td>
+                    <td><button class="edit-btn" data-id="${employee.id}">Save</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById('dataTable').style.display = 'block'; // Show the Data Table
+        }
+
+        document.getElementById('dataTableButton').addEventListener('click', showDataTable);
+
+        // Save changes
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('edit-btn')) {
+                const id = e.target.getAttribute('data-id');
+                const inputs = e.target.parentElement.parentElement.querySelectorAll('input');
+                
+                inputs.forEach(input => {
+                    const field = input.getAttribute('data-field');
+                    const value = input.value;
+                    
+                    // Find the employee data and update the field
+                    const employee = employeeData.find(emp => emp.id === id);
+                    if (employee) {
+                        employee[field] = value;
+                    }
+                });
+
+                alert('Employee data updated successfully!'); // Notify the user
+            }
+        });
+
         const width = window.innerWidth;
         const height = window.innerHeight;
 
@@ -144,162 +195,144 @@
         let treeData = treeLayout(root);
         let nodes = treeData.descendants();
         let links = treeData.links();
+            const link = svg.selectAll(".link")
+        .data(links)
+        .enter()
+        .append("path")
+        .attr("class", "link")
+        .attr("d", d3.linkHorizontal()
+            .x(d => d.y)
+            .y(d => d.x));
 
-        // Collapse nodes at first render
-        nodes.forEach((d) => {
-            if (d.depth === 1) {
-                collapse(d);
-            }
+    const node = svg.selectAll(".node")
+        .data(nodes)
+        .enter()
+        .append("g")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${d.y}, ${d.x})`)
+        .on("click", function(event, d) {
+            d3.select(this).classed("selected", !d3.select(this).classed("selected"));
         });
 
-        update(root);
+    node.append("rect")
+        .attr("width", 100)
+        .attr("height", 30);
 
-        function update(source) {
-            treeData = treeLayout(root);
-            nodes = treeData.descendants();
-            links = treeData.links();
+    node.append("text")
+        .attr("dy", 20)
+        .attr("dx", 5)
+        .text(d => d.data.name);
 
-            svg.selectAll("*").remove();
-
-            // Render links
-            const link = svg.selectAll(".link")
-                .data(links)
-                .enter().append("path")
-                .attr("class", "link")
-                .attr("d", d3.linkVertical()
-                    .x((d) => d.x)
-                    .y((d) => d.y)
-                )
-                .attr("stroke-width", "2px");
-
-            const node = svg.selectAll(".node")
-                .data(nodes)
-                .enter().append("g")
-                .attr("class", "node")
-                .attr("transform", (d) => `translate(${d.x},${d.y})`);
-
-            node.append("rect")
-                .attr("width", 120)
-                .attr("height", 60)
-                .attr("x", -60)
-                .attr("y", -30)
-                .style("fill", "#fff")
-                .on("click", click);
-
-            node.append("text")
-                .attr("dy", "-5px")
-                .attr("y", -10)
-                .style("text-anchor", "middle")
-                .text((d) => d.data.name);
-
-            node.append("text")
-                .attr("dy", "1.2em")
-                .attr("y", -5)
-                .style("text-anchor", "middle")
-                .style("font-size", "10px")
-                .text((d) => d.data.jobTitle); }
-            function zoomed(event) {
+    function zoomed(event) {
         svg.attr("transform", event.transform);
     }
 
-    function collapse(d) {
-        if (d.children) {
-            d._children = d.children;
-            d.children = null;
-        }
-    }
-
-    function click(event, d) {
-        if (d.children) {
-            collapse(d);
-        } else {
-            d.children = d._children;
-        }
-        update(d);
-    }
-
-    document.getElementById("zoomSlider").addEventListener("input", function () {
-        const scale = this.value;
-        svg.attr("transform", `scale(${scale})`);
+    // Zoom Slider
+    document.getElementById('zoomSlider').addEventListener('input', (event) => {
+        const zoomLevel = event.target.value;
+        svg.attr("transform", `scale(${zoomLevel})`);
     });
 
-    document.getElementById("collapseAllBtn").addEventListener("click", function () {
-        nodes.forEach(collapse);
-        update(root);
-    });
-
-    document.getElementById("expandAllBtn").addEventListener("click", function () {
-        nodes.forEach((d) => {
-            d.children = d._children;
+    // Collapse and Expand functions
+    function collapseAll(nodes) {
+        nodes.forEach((node) => {
+            node.children.forEach(collapse);
+            node._children = node.children;
+            node.children = null;
         });
-        update(root);
-    });
+    }
 
-    document.getElementById("expandNextLevelBtn").addEventListener("click", function () {
-        nodes.forEach((d) => {
-            if (d.depth === 1) {
-                d.children = d._children;
+    function expandAll(nodes) {
+        nodes.forEach((node) => {
+            if (node._children) {
+                node.children = node._children;
+                node._children = null;
+            }
+            if (node.children) {
+                expandAll(node.children);
             }
         });
-        update(root);
-    });
+    }
 
-    document.getElementById("collapseNextLevelBtn").addEventListener("click", function () {
-        nodes.forEach((d) => {
-            if (d.depth === 1 && d.children) {
-                collapse(d);
+    function expandNextLevel(nodes) {
+        nodes.forEach((node) => {
+            if (node.children) {
+                node.children.forEach((child) => {
+                    child.children = child._children;
+                });
+            }
+            if (node.children) {
+                expandNextLevel(node.children);
             }
         });
-        update(root);
-    });
+    }
 
-    // Populate the data table
-    function populateDataTable() {
-        const tbody = document.getElementById('employeeDataTableBody');
-        tbody.innerHTML = ''; // Clear existing rows
-        employeeData.forEach(emp => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${emp.id}</td>
-                <td><input type="text" value="${emp.name}" data-id="${emp.id}" /></td>
-                <td>${emp.team}</td>
-                <td>${emp.jobTitle}</td>
-                <td><button onclick="editEmployee('${emp.id}')">Save</button></td>
-            `;
-            tbody.appendChild(tr);
+    function collapseNextLevel(nodes) {
+        nodes.forEach((node) => {
+            if (node.children) {
+                node.children.forEach((child) => {
+                    collapse(child);
+                });
+            }
+            if (node.children) {
+                collapseNextLevel(node.children);
+            }
         });
     }
 
-    // Handle editing an employee
-    function editEmployee(id) {
-        const nameInput = document.querySelector(`input[data-id="${id}"]`);
-        const newName = nameInput.value;
-        const employee = employeeData.find(emp => emp.id === id);
-        if (employee) {
-            employee.name = newName; // Update name in data array
-            update(root); // Refresh org chart
-        }
+    document.getElementById('collapseAllBtn').addEventListener('click', () => {
+        collapseAll(root.descendants());
+        updateTree();
+    });
+
+    document.getElementById('expandAllBtn').addEventListener('click', () => {
+        expandAll(root.descendants());
+        updateTree();
+    });
+
+    document.getElementById('expandNextLevelBtn').addEventListener('click', () => {
+        expandNextLevel(root.descendants());
+        updateTree();
+    });
+
+    document.getElementById('collapseNextLevelBtn').addEventListener('click', () => {
+        collapseNextLevel(root.descendants());
+        updateTree();
+    });
+
+    function updateTree() {
+        treeData = treeLayout(root);
+        nodes = treeData.descendants();
+        links = treeData.links();
+
+        svg.selectAll(".link").data(links)
+            .join("path")
+            .attr("class", "link")
+            .attr("d", d3.linkHorizontal()
+                .x(d => d.y)
+                .y(d => d.x));
+
+        svg.selectAll(".node")
+            .data(nodes)
+            .join("g")
+            .attr("class", "node")
+            .attr("transform", d => `translate(${d.y}, ${d.x})`)
+            .on("click", function(event, d) {
+                d3.select(this).classed("selected", !d3.select(this).classed("selected"));
+            })
+            .each(function(d) {
+                d3.select(this).select("rect").remove();
+                d3.select(this).select("text").remove();
+                d3.select(this).append("rect")
+                    .attr("width", 100)
+                    .attr("height", 30);
+                d3.select(this).append("text")
+                    .attr("dy", 20)
+                    .attr("dx", 5)
+                    .text(d => d.data.name);
+            });
     }
-
-    // Handle switching to the data table view
-    document.getElementById('dataTableButton').addEventListener('click', function () {
-        document.getElementById('orgChart').style.display = 'none';
-        document.getElementById('dataTable').style.display = 'block';
-        populateDataTable(); // Populate the data table on switch
-    });
-
-    // Optional: You can add a button to go back to the org chart
-    const backToOrgChartButton = document.createElement('button');
-    backToOrgChartButton.innerText = 'Back to Org Chart';
-    backToOrgChartButton.style.position = 'absolute';
-    backToOrgChartButton.style.top = '10px';
-    backToOrgChartButton.style.left = '10px';
-    backToOrgChartButton.style.zIndex = '10';
-    document.body.appendChild(backToOrgChartButton);
-    backToOrgChartButton.addEventListener('click', function () {
-        document.getElementById('orgChart').style.display = 'block';
-        document.getElementById('dataTable').style.display = 'none';
-    });
 </script>
 </body>
 </html>
+
