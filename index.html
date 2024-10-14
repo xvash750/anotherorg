@@ -32,7 +32,8 @@
             stroke: #999;
             stroke-width: 2px;
         }
-        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandNextLevelBtn, #collapseNextLevelBtn {
+        /* Positioning Buttons */
+        #zoomSlider, #collapseAllBtn, #expandAllBtn, #expandNextLevelBtn, #collapseNextLevelBtn, #dataTableBtn {
             position: absolute;
             top: 10px;
             z-index: 10;
@@ -52,6 +53,10 @@
         #collapseNextLevelBtn {
             left: 550px;
         }
+        /* New Data Table Button */
+        #dataTableBtn {
+            left: 625px; /* 550px + 75px */
+        }
     </style>
 </head>
 <body>
@@ -62,6 +67,8 @@
     <button id="expandAllBtn">Expand All</button>
     <button id="expandNextLevelBtn">Expand to Next Level</button>
     <button id="collapseNextLevelBtn">Collapse to Next Level</button>
+    <!-- New Data Table Button -->
+    <button id="dataTableBtn" onclick="window.location.href='data_table.html'">Data Table</button>
 
     <script>
         const employeeData = [
@@ -223,10 +230,14 @@
             update(root);
         });
 
-        // Zoom slider
+        // Zoom slider functionality
         document.getElementById("zoomSlider").addEventListener("input", function () {
             const scale = this.value;
-            svg.attr("transform", `scale(${scale})`);
+            d3.select("svg").transition().duration(500)
+                .call(
+                    d3.zoom().transform,
+                    d3.zoomIdentity.scale(scale)
+                );
         });
     </script>
 </body>
