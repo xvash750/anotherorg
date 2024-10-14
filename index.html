@@ -52,6 +52,27 @@
         #collapseNextLevelBtn {
             left: 550px;
         }
+              #editForm {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            display: none; /* Hidden initially */
+            width: 250px;
+        }
+        #editForm label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        #editForm input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -62,6 +83,26 @@
     <button id="expandAllBtn">Expand All</button>
     <button id="expandNextLevelBtn">Expand to Next Level</button>
     <button id="collapseNextLevelBtn">Collapse to Next Level</button>
+        <!-- Edit Form -->
+    <div id="editForm">
+        <label for="editId">ID (Read-only)</label>
+        <input type="text" id="editId" readonly />
+        
+        <label for="editName">Name</label>
+        <input type="text" id="editName" />
+        
+        <label for="editTeam">Team</label>
+        <input type="text" id="editTeam" />
+        
+        <label for="editJobTitle">Job Title</label>
+        <input type="text" id="editJobTitle" />
+        
+        <label for="editManagerId">Manager ID</label>
+        <input type="text" id="editManagerId" />
+        
+        <button id="saveBtn">Save</button>
+        <button id="cancelBtn">Cancel</button>
+    </div>
 
     <script>
         const employeeData = [
@@ -194,6 +235,34 @@
                 d._children = d.children;
                 d.children = null;
             }
+        }
+        // Show edit form
+        function showEditForm(d) {
+            document.getElementById("editForm").style.display = "block";
+            document.getElementById("editId").value = d.data.id;
+            document.getElementById("editName").value = d.data.name;
+            document.getElementById("editTeam").value = d.data.team;
+            document.getElementById("editJobTitle").value = d.data.jobTitle;
+            document.getElementById("editManagerId").value = d.data.managerId;
+
+            document.getElementById("saveBtn").onclick = function () {
+                saveEdit(d);
+            };
+
+            document.getElementById("cancelBtn").onclick = function () {
+                document.getElementById("editForm").style.display = "none";
+            };
+        }
+
+        // Save changes to the node data
+        function saveEdit(d) {
+            d.data.name = document.getElementById("editName").value;
+            d.data.team = document.getElementById("editTeam").value;
+            d.data.jobTitle = document.getElementById("editJobTitle").value;
+            d.data.managerId = document.getElementById("editManagerId").value;
+
+            update(d); // Update the chart with the new data
+            document.getElementById("editForm").style.display = "none"; // Hide the form
         }
 
         // Expand/collapse all nodes
