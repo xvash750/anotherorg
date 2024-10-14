@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Org Chart with Edit Form</title>
+    <title>Compact Columnar Org Chart with Cards</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
@@ -19,7 +19,7 @@
             fill: #fff;
             stroke: steelblue;
             stroke-width: 2px;
-            rx: 10;
+            rx: 10; /* Rounded corners */
             ry: 10;
         }
         .node text {
@@ -37,26 +37,20 @@
             top: 10px;
             z-index: 10;
         }
-        #editForm {
-            position: absolute;
-            top: 50px;
-            right: 20px;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            padding: 10px;
-            display: none; /* Hidden initially */
-            width: 250px;
+        #zoomSlider {
+            left: 10px;
         }
-        #editForm label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 12px;
+        #collapseAllBtn {
+            left: 150px;
         }
-        #editForm input {
-            width: 100%;
-            padding: 5px;
-            margin-bottom: 10px;
-            font-size: 12px;
+        #expandAllBtn {
+            left: 250px;
+        }
+        #expandNextLevelBtn {
+            left: 350px;
+        }
+        #collapseNextLevelBtn {
+            left: 550px;
         }
     </style>
 </head>
@@ -68,27 +62,6 @@
     <button id="expandAllBtn">Expand All</button>
     <button id="expandNextLevelBtn">Expand to Next Level</button>
     <button id="collapseNextLevelBtn">Collapse to Next Level</button>
-
-    <!-- Edit Form -->
-    <div id="editForm">
-        <label for="editId">ID (Read-only)</label>
-        <input type="text" id="editId" readonly />
-        
-        <label for="editName">Name</label>
-        <input type="text" id="editName" />
-        
-        <label for="editTeam">Team</label>
-        <input type="text" id="editTeam" />
-        
-        <label for="editJobTitle">Job Title</label>
-        <input type="text" id="editJobTitle" />
-        
-        <label for="editManagerId">Manager ID</label>
-        <input type="text" id="editManagerId" />
-        
-        <button id="saveBtn">Save</button>
-        <button id="cancelBtn">Cancel</button>
-    </div>
 
     <script>
         const employeeData = [
@@ -165,8 +138,7 @@
                 .data(nodes)
                 .enter().append("g")
                 .attr("class", "node")
-                .attr("transform", (d) => `translate(${d.x},${d.y})`)
-                .on("click", (event, d) => showEditForm(d));
+                .attr("transform", (d) => `translate(${d.x},${d.y})`);
 
             node.append("rect")
                 .attr("width", 120)
@@ -190,14 +162,31 @@
                 .text((d) => d.data.team);
 
             node.append("text")
-                .attr("dy", "2.4em")
+                .attr("dy", "1.2em")
+                .attr("y", 10)
                 .style("text-anchor", "middle")
                 .style("font-size", "10px")
                 .text((d) => d.data.jobTitle);
         }
 
+        // Zoom function
         function zoomed(event) {
             svg.attr("transform", event.transform);
+        }
+
+        function click(event, d) {
+            d.children ? collapse(d) : expand(d);
+            update(d);
+        }
+
+        function expand(d) {
+            if (d._children) {
+                d.children = d._children;
+                d._children = null;
+            }
+            if (d.children) {
+                d.children.forEach(expand); // Expand all descendants
+            }
         }
 
         function collapse(d) {
@@ -207,51 +196,14 @@
             }
         }
 
-        function expand(d) {
-            if (d._children) {
-                d.children = d._children;
-                d._children = null;
-            }
-        }
-
-        // Show edit form
-        function showEditForm(d) {
-            document.getElementById("editForm").style.display = "block";
-            document.getElementById("editId").value = d.data.id;
-            document.getElementById("editName").value = d.data.name;
-            document.getElementById("editTeam").value = d.data.team;
-            document.getElementById("editJobTitle").value = d.data.jobTitle;
-            document.getElementById("editManagerId").value = d.data.managerId;
-
-            document.getElementById("saveBtn").onclick = function () {
-                saveEdit(d);
-            };
-
-            document.getElementById("cancelBtn").onclick = function () {
-                document.getElementById("editForm").style.display = "none";
-            };
-        }
-
-        // Save changes to the node data
-        function saveEdit(d) {
-            d.data.name = document.getElementById("editName").value;
-            d.data.team = document.getElementById("editTeam").value;
-            d.data.jobTitle = document.getElementById("editJobTitle").value;
-            d.data.managerId = document.getElementById("editManagerId").value;
-
-            update(d); // Update the chart with the new data
-            document.getElementById("editForm").style.display = "none"; // Hide the form
-        }
-
-        // Expand All Button
-        document.getElementById("expandAllBtn").addEventListener("click", function () {
-            nodes.forEach(expand); // Expand all nodes
+        // Expand/collapse all nodes
+        document.getElementById("collapseAllBtn").addEventListener("click", function () {
+            nodes.forEach(collapse);
             update(root);
         });
 
-        // Collapse All Button
-        document.getElementById("collapseAllBtn").addEventListener("click", function () {
-            nodes.forEach(collapse); // Collapse all nodes
+        document.getElementById("expandAllBtn").addEventListener("click", function () {
+            nodes.forEach(expand); // Expand all nodes
             update(root);
         });
 
